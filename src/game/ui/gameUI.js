@@ -84,7 +84,9 @@ export function createGameUI() {
   for (const elem of upgradeElements) {
     const add = elem.querySelector(".add");
     add.addEventListener("click", () => {
-      updateUpgrades(elem.dataset.upgrade);
+      if (state.game.upgrades > 0) {
+        updateUpgrades(elem.dataset.upgrade);
+      }
     });
   }
 

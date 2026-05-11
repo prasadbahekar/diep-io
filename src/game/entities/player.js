@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { getLevelData } from "../data/levels";
 import { state } from "../state";
+import Bullet from "./bullet";
 
 export default class Player extends Phaser.GameObjects.Container {
   constructor(scene, x, y) {
@@ -17,6 +18,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this.scene = scene;
     this.weapon = weapon;
     this.weapons = weapons;
+    this.bullets = [];
 
     // Variables
     this.isShooting = false;
@@ -70,16 +72,34 @@ export default class Player extends Phaser.GameObjects.Container {
 
   shoot() {
     const now = this.scene.time.now;
-
-    if (this.isMouseDown && now - this.lastShotTime >= 1000) {
+    const ifShoot =
+      this.isMouseDown &&
+      !(this.mouseX < 224 && this.mouseY > window.innerHeight - 224);
+    if (ifShoot && now - this.lastShotTime >= 1000) {
       this.isShooting = true;
       this.lastShotTime = now;
       this.weaponOriginalX = this.weapon.x;
       this.justShoot = true;
       state.game.score += 5;
 
+      const angle = this.weapons.rotation;
+      const velX = Math.cos(angle) * 3 + this.velX * 0.01;
+      const velY = Math.sin(angle) * 3 + this.velY * 0.01;
+      const bulletX = this.x + Math.cos(angle) * 24;
+      const bulletY = this.y + Math.sin(angle) * 24;
+      const bullet = new Bullet(
+        this.scene,
+        bulletX,
+        bulletY,
+        this.weapon.height * 0.9,
+        velX,
+        velY,
+      );
+
+      this.bullets.push(bullet);
+
       this.weapon.scaleX = 0.8;
-      const recoilForce = 40;
+      const recoilForce = 10;
       this.velX -= Math.cos(this.weapons.rotation) * recoilForce;
       this.velY -= Math.sin(this.weapons.rotation) * recoilForce;
     }
@@ -116,6 +136,12 @@ export default class Player extends Phaser.GameObjects.Container {
       targetZoom,
       0.08,
     );
+
+    // Update bullets
+    for (const bullet of this.bullets) {
+      bullet.update();
+    }
+    this.bullets = this.bullets.filter((bullet) => !bullet.dead);
   }
 
   weaponUpdate(camera) {
