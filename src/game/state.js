@@ -10,6 +10,9 @@ export const state = {
     score: 0,
     level: 1,
     upgrades: 0,
+    baseHealth: 0,
+    health: 0,
+    maxHealth: 0,
     stats: {
       regen: 0,
       maxHealth: 0,

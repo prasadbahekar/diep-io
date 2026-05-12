@@ -117,6 +117,10 @@ export function updateGameUI() {
     add.classList.toggle("disabled", disabled);
     add.style.backgroundColor = disabled ? "#999" : elem.dataset.color;
   }
+
+  const upgradeCount = document.getElementById("upgrade-count");
+  upgradeCount.textContent =
+    state.game.upgrades > 1 ? `${state.game.upgrades}x` : "";
 }
 
 function updateUpgrades(title) {
@@ -182,5 +186,24 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keyup", (e) => {
   if (mKey && e.key == "m") {
     mKey = false;
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  const key = parseInt(e.key);
+
+  // Ignore non-number keys
+  if (isNaN(key)) return;
+
+  // Only allow 1-8
+  if (key < 1 || key > 8) return;
+
+  // No upgrades available
+  if (state.game.upgrades <= 0) return;
+
+  const upgrade = upgradeElements[key - 1];
+
+  if (upgrade) {
+    updateUpgrades(upgrade.dataset.upgrade);
   }
 });

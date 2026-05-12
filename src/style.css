@@ -294,6 +294,13 @@ canvas {
     transform: translateX(0);
 }
 
+#game-ui #upgrades #upgrade-count {
+    position: absolute;
+    top: -20px;
+    right: -24px;
+    transform: rotateZ(-20deg);
+}
+
 #game-ui #upgrades .upgrade {
     width: 192px;
     height: 18px;

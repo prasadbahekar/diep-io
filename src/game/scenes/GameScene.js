@@ -3,6 +3,7 @@ import Player from "../entities/player";
 import { createGameUI, updateGameUI } from "../ui/gameUI";
 import { state } from "../state";
 import { getLevelFromScore } from "../data/levels";
+import { regenHP } from "../data/upgrades";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -45,17 +46,44 @@ export default class GameScene extends Phaser.Scene {
     createGameUI();
   }
 
-  update() {
+  update(time, delta) {
     this.player.update(this.cursors, this.keys, this.cameras.main);
-    this.updateGameMetrics();
+    this.updateGameMetrics(delta);
     updateGameUI();
   }
 
-  updateGameMetrics() {
+  updateGameMetrics(delta) {
+    // Level
     state.game.level = getLevelFromScore(state.game.score);
     if (this.prevLvl !== state.game.level) {
       state.game.upgrades += 1;
       this.prevLvl = state.game.level;
+    }
+
+    // Health
+    state.game.baseHealth = 50 + 2 * (state.game.level - 1);
+    state.game.maxHealth =
+      state.game.baseHealth + state.game.stats.maxHealth * 20;
+
+    if (isNaN(this.prevMaxHealth)) this.prevMaxHealth = state.game.maxHealth;
+    console.log(this.prevMaxHealth);
+
+    if (state.game.maxHealth != this.prevMaxHealth) {
+      console.log(state.game.health);
+      state.game.health =
+        (state.game.health / this.prevMaxHealth) * state.game.maxHealth;
+      console.log(state.game.health);
+    }
+
+    this.prevMaxHealth = state.game.maxHealth;
+
+    state.game.health +=
+      state.game.maxHealth *
+      regenHP[state.game.stats.regen].percent *
+      (delta / 1000);
+
+    if (state.game.health > state.game.maxHealth) {
+      state.game.health = state.game.maxHealth;
     }
   }
 }

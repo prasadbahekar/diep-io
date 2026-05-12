@@ -13,11 +13,14 @@ export default class Player extends Phaser.GameObjects.Container {
     weapon.setStrokeStyle(1, 0x787878);
 
     const weapons = scene.add.container(0, 0, [weapon]);
-    super(scene, x, y, [weapons, pBody]);
+    const healthBar = scene.add.graphics();
+
+    super(scene, x, y, [weapons, pBody, healthBar]);
 
     this.scene = scene;
     this.weapon = weapon;
     this.weapons = weapons;
+    this.healthBar = healthBar;
     this.bullets = [];
 
     // Variables
@@ -142,6 +145,30 @@ export default class Player extends Phaser.GameObjects.Container {
       bullet.update();
     }
     this.bullets = this.bullets.filter((bullet) => !bullet.dead);
+
+    // Render Health
+    if (state.game.health == state.game.maxHealth) this.healthBar.clear();
+    else this.renderHealthBar(state.game.health / state.game.maxHealth);
+  }
+
+  renderHealthBar(percent) {
+    this.healthBar.clear();
+
+    const width = 24;
+    const height = 3;
+    const radius = height / 2;
+
+    const x = -width / 2;
+    const y = 20;
+
+    this.healthBar.fillStyle(0x444444, 1);
+    this.healthBar.fillRoundedRect(x, y, width, height, radius);
+
+    this.healthBar.fillStyle(0x00ff00, 1);
+    this.healthBar.fillRoundedRect(x, y, width * percent, height, radius);
+
+    this.healthBar.lineStyle(1, 0x444444);
+    this.healthBar.strokeRoundedRect(x, y, width, height, radius);
   }
 
   weaponUpdate(camera) {
