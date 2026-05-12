@@ -23,5 +23,6 @@ export const state = {
       reload: 0,
       movementSpeed: 0,
     },
+    polygons: [],
   },
 };
