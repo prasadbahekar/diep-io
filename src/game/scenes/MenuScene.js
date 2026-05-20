@@ -7,19 +7,28 @@ export default class MenuScene extends Phaser.Scene {
     super({ key: "MenuScene" });
   }
 
-  preload() {}
+  preload() {
+    this.load.audio("start", "/assets/sounds/ui/start-game.mp3");
+  }
 
   create() {
     const ui = document.getElementById("home-menu");
     const button = document.getElementById("startBtn");
+    const buttonText = document.getElementById("startBtnLbl");
     ui.style.display = "flex";
     state.game.started = false;
 
     button.onclick = async () => {
       try {
+        // button.disableInteractive();
+        this.sound.play("start");
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        buttonText.innerText = "Loading...";
+        await new Promise((resolve) => setTimeout(resolve, 1900));
         await enterFullscreen();
         ui.style.display = "none";
         this.scene.start("GameScene");
+        buttonText.innerText = "Play!";
       } catch (err) {
         alert("Please allow fullscreen to play the game!");
       }

@@ -4,6 +4,7 @@ import { enterFullscreen } from "./game/utils/functions";
 import GameScene from "./game/scenes/GameScene";
 import {} from "./game/ui/homeMenu";
 
+// Game Initialization
 const config = {
   type: Phaser.AUTO,
   parent: document.body,
@@ -26,6 +27,7 @@ const config = {
 
 const game = new Phaser.Game(config);
 
+// Fullscreen Manager
 window.addEventListener("resize", () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
   game.scale.resize(window.innerWidth, window.innerHeight);
