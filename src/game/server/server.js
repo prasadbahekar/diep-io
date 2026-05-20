@@ -14,7 +14,7 @@ export function joinPlayer() {
     velY: 8,
     hp: 0,
     rotation: 0,
-    type: "square",
+    type: "triangle",
   });
 
   console.log(world.polygons.get(polyId));
@@ -54,7 +54,6 @@ function createPacket() {
 
   packet.polygons = [];
   world.polygons.forEach((polygon) => {
-    console.log(polygon);
     packet.polygons.push({
       id: polygon.id,
       x: polygon.x,

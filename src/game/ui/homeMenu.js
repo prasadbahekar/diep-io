@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const nameInput = document.getElementById("playerNameInput");
-console.log("sjkdhflaksjhd");
 nameInput.value = localStorage.getItem("playerNameValue") || "";
 nameInput.addEventListener("input", () => {
   localStorage.setItem("playerNameValue", nameInput.value);

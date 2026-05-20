@@ -96,8 +96,8 @@ function playerShoot(player) {
     player.lastShoot = now;
 
     const angle = player.rotation;
-    const velX = Math.cos(angle) * 20 + player.velX * 0.05;
-    const velY = Math.sin(angle) * 20 + player.velY * 0.05;
+    const velX = Math.cos(angle) * 20 + player.velX * 0.02;
+    const velY = Math.sin(angle) * 20 + player.velY * 0.02;
     const bulletX = player.x + Math.cos(angle) * 24;
     const bulletY = player.y + Math.sin(angle) * 24;
 
