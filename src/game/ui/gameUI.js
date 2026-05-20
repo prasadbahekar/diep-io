@@ -100,8 +100,8 @@ export function updateGameUI() {
   const scoreEl = document.getElementById("scoreTitle");
   const levelEl = document.getElementById("levelTitle");
 
-  scoreEl.textContent = `Score: ${state.game.score}`;
-  levelEl.textContent = `Lvl ${state.game.level} Tank`;
+  scoreEl.textContent = `Score: ${state.game.player.score}`;
+  levelEl.textContent = `Lvl ${state.game.player.level} Tank`;
 
   updateProgressBar();
 
@@ -144,18 +144,19 @@ function updateUpgrades(title) {
 
 function updateProgressBar() {
   const levelProgress =
-    (state.game.score - getLevelData(state.game.level).pointsNeeded) /
-    getPointsToNextLevel(state.game.level);
+    (state.game.player.score -
+      getLevelData(state.game.player.level).pointsNeeded) /
+    getPointsToNextLevel(state.game.player.level);
 
   let targetWidth = levelProgress * 100;
   let lerpSpeed = 0.05;
 
-  if (state.game.level !== prevLevel || animateProgress) {
+  if (state.game.player.level !== prevLevel || animateProgress) {
     targetWidth = 100;
     lerpSpeed = 0.075;
     if (Math.round(currentWidth) == targetWidth) {
       animateProgress = true;
-      prevLevel = state.game.level;
+      prevLevel = state.game.player.level;
     }
 
     if (animateProgress) {
@@ -166,7 +167,7 @@ function updateProgressBar() {
     }
   } else {
     targetWidth = levelProgress * 100;
-    prevLevel = state.game.level;
+    prevLevel = state.game.player.level;
   }
 
   if (targetWidth < 5) targetWidth = 5;

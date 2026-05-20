@@ -4,7 +4,11 @@ import { createGameUI, updateGameUI } from "../ui/gameUI";
 import { state } from "../state";
 import { getLevelFromScore } from "../data/levels";
 import { regenHP } from "../data/upgrades";
+import { input } from "../utils/input";
 import Polygon from "../entities/polygon";
+import { updateServer, joinPlayer } from "../server/server";
+import Bullet from "../entities/bullet";
+import { packet } from "../server/packet";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -14,41 +18,44 @@ export default class GameScene extends Phaser.Scene {
   create() {
     const cellSize = 24;
     const worldSize = 400 * cellSize;
+    state.game.player.id = joinPlayer();
     this.prevLvl = 1;
 
     // Polygons
-    state.game.polygons = [
-      {
-        id: 1,
-        type: "square",
-        x: 0,
-        y: 0,
-        rotation: 0,
-      },
-      {
-        id: 2,
-        type: "square",
-        x: worldSize / 2 - 100,
-        y: worldSize / 2 - 50,
-        rotation: 0,
-      },
-    ];
+    // state.game.polygons = [
+    //   {
+    //     id: 1,
+    //     type: "square",
+    //     x: 0,
+    //     y: 0,
+    //     rotation: 0,
+    //   },
+    //   {
+    //     id: 2,
+    //     type: "square",
+    //     x: worldSize / 2 - 100,
+    //     y: worldSize / 2 - 50,
+    //     rotation: 0,
+    //   },
+    // ];
 
-    this.polygonObjects = [];
+    // this.polygonObjects = [];
+    this.renderedBullets = new Map();
+    this.renderedPolygons = new Map();
 
-    state.game.polygons.forEach((polygonData) => {
-      const polygon = new Polygon(
-        this,
-        polygonData.x,
-        polygonData.y,
-        polygonData.type,
-        polygonData.rotation,
-      );
+    // state.game.polygons.forEach((polygonData) => {
+    //   const polygon = new Polygon(
+    //     this,
+    //     polygonData.x,
+    //     polygonData.y,
+    //     polygonData.type,
+    //     polygonData.rotation,
+    //   );
 
-      polygon.id = polygonData.id;
+    //   polygon.id = polygonData.id;
 
-      this.polygonObjects.push(polygon);
-    });
+    //   this.polygonObjects.push(polygon);
+    // });
 
     // Controls
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -60,8 +67,20 @@ export default class GameScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
 
+    window.addEventListener("mousemove", (e) => {
+      this.mouseX = e.clientX;
+      this.mouseY = e.clientY;
+    });
+
+    window.addEventListener("mousedown", () => {
+      this.isMouseDown = true;
+    });
+
+    window.addEventListener("mouseup", () => {
+      this.isMouseDown = false;
+    });
+
     // Player
-    // this.player = new Player(this, 2, 2);
     this.player = new Player(this, worldSize / 2, worldSize / 2);
     this.player.body.setCollideWorldBounds(true);
 
@@ -83,48 +102,133 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    this.player.update(this.cursors, this.keys, this.cameras.main);
-    this.updateGameMetrics(delta);
-
-    // Update polygons
-    this.polygonObjects.forEach((polygon) => {
-      const data = state.game.polygons.find((p) => p.id === polygon.id);
-      if (data) data.rotation += 0.001 * delta;
-      polygon.update(data);
-    });
-
+    this.updateInput();
+    updateServer(delta);
+    this.updateLocalTruth();
+    this.player.update();
+    this.updateBullets();
+    this.updatePolygons();
     updateGameUI();
+
+    //
+    state.game.player.prevX = state.game.player.x;
+    state.game.player.prevY = state.game.player.y;
   }
 
-  updateGameMetrics(delta) {
-    // Level
-    state.game.level = getLevelFromScore(state.game.score);
-    if (this.prevLvl !== state.game.level) {
-      state.game.upgrades += 1;
-      this.prevLvl = state.game.level;
-    }
+  updateLocalTruth() {
+    state.game.player.x = packet.player.x;
+    state.game.player.y = packet.player.y;
+    state.game.player.rotation = packet.player.rotation;
+    state.game.player.score = packet.player.score;
+    state.game.player.level = packet.player.level;
+    state.game.player.lastShoot = packet.player.lastShoot;
 
-    // Health
-    state.game.baseHealth = 50 + 2 * (state.game.level - 1);
-    state.game.maxHealth =
-      state.game.baseHealth + state.game.stats.maxHealth * 20;
-
-    if (isNaN(this.prevMaxHealth)) this.prevMaxHealth = state.game.maxHealth;
-
-    if (state.game.maxHealth != this.prevMaxHealth) {
-      state.game.health =
-        (state.game.health / this.prevMaxHealth) * state.game.maxHealth;
-    }
-
-    this.prevMaxHealth = state.game.maxHealth;
-
-    state.game.health +=
-      state.game.maxHealth *
-      regenHP[state.game.stats.regen].percent *
-      (delta / 1000);
-
-    if (state.game.health > state.game.maxHealth) {
-      state.game.health = state.game.maxHealth;
-    }
+    state.game.bullets = packet.bullets;
+    state.game.polygons = packet.polygons;
+    state.game.packetNow = packet.player.now;
   }
+
+  updateInput() {
+    input.up = this.cursors.up.isDown || this.keys.up.isDown;
+    input.down = this.cursors.down.isDown || this.keys.down.isDown;
+    input.left = this.cursors.left.isDown || this.keys.left.isDown;
+    input.right = this.cursors.right.isDown || this.keys.right.isDown;
+
+    const worldPoint = this.cameras.main.getWorldPoint(
+      this.mouseX,
+      this.mouseY,
+    );
+    input.mouseX = worldPoint.x;
+    input.mouseY = worldPoint.y;
+    input.shoot = this.isMouseDown;
+  }
+
+  updateBullets() {
+    state.player.shoot = false;
+    const bulletIds = new Set(packet.bullets.map((b) => b.id));
+    for (const key of this.renderedBullets.keys()) {
+      if (!bulletIds.has(key)) {
+        this.renderedBullets.delete(key);
+      }
+    }
+
+    packet.bullets.forEach((bullet) => {
+      if (this.renderedBullets.has(bullet.id)) {
+        const bulletObj = this.renderedBullets.get(bullet.id);
+        bulletObj.update(bullet.x, bullet.y, bullet.lifespan);
+      } else {
+        const bulletObj = new Bullet(
+          this,
+          bullet.id,
+          bullet.x,
+          bullet.y,
+          bullet.lifespan,
+          this.player.weapon.height * 0.8,
+        );
+        this.renderedBullets.set(bullet.id, bulletObj);
+        if (bullet.parent == state.game.player.id) {
+          state.game.player.lastShoot = new Date().getTime();
+        }
+      }
+    });
+  }
+
+  updatePolygons() {
+    const polyIds = new Set(packet.polygons.map((b) => b.id));
+
+    for (const key of this.renderedPolygons.keys()) {
+      if (!polyIds.has(key)) {
+        this.renderedPolygons.delete(key);
+      }
+    }
+
+    packet.polygons.forEach((polygon) => {
+      if (this.renderedPolygons.has(polygon.id)) {
+        const polygonObj = this.renderedPolygons.get(polygon.id);
+        polygonObj.update(polygon.x, polygon.y, polygon.rotation);
+      } else {
+        const polygonObj = new Polygon(
+          this,
+          polygon.id,
+          polygon.x,
+          polygon.y,
+          polygon.type,
+          polygon.rotation,
+        );
+        this.renderedPolygons.set(polygon.id, polygonObj);
+      }
+    });
+  }
+
+  // updateGameMetrics(delta) {
+  //   // Level
+  //   state.game.level = getLevelFromScore(state.game.score);
+  //   if (this.prevLvl !== state.game.level) {
+  //     state.game.upgrades += 1;
+  //     this.prevLvl = state.game.level;
+  //   }
+
+  //   // Health
+  //   state.game.baseHealth = 50 + 2 * (state.game.level - 1);
+  //   state.game.maxHealth =
+  //     state.game.baseHealth + state.game.stats.maxHealth * 20;
+
+  //   if (isNaN(this.prevMaxHealth)) this.prevMaxHealth = state.game.maxHealth;
+
+  //   if (state.game.maxHealth != this.prevMaxHealth) {
+  //     state.game.health =
+  //       (state.game.health / this.prevMaxHealth) * state.game.maxHealth;
+  //   }
+
+  //   this.prevMaxHealth = state.game.maxHealth;
+
+  //   state.game.health +=
+  //     state.game.maxHealth *
+  //     regenHP[state.game.stats.regen].percent *
+  //     (delta / 1000);
+
+  //   if (state.game.health > state.game.maxHealth) {
+  //     state.game.health = state.game.maxHealth;
+  //   }
+  // }
 }

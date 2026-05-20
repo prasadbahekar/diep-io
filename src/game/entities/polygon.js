@@ -1,9 +1,9 @@
 import Phaser from "phaser";
 
 export default class Polygon extends Phaser.GameObjects.Rectangle {
-  constructor(scene, x, y, type, rotation = 0) {
+  constructor(scene, id, x, y, type, rotation = 0) {
     super(scene, x, y, 32, 32, 0xffffff);
-    this.setStrokeStyle(3, 0x666666);
+    this.setStrokeStyle(2, 0x666666);
 
     scene.add.existing(this);
 
@@ -27,9 +27,9 @@ export default class Polygon extends Phaser.GameObjects.Rectangle {
     }
   }
 
-  update(data) {
-    this.x = data.x;
-    this.y = data.y;
-    this.rotation = data.rotation;
+  update(x, y, rotation) {
+    this.x = x;
+    this.y = y;
+    this.rotation = rotation;
   }
 }
