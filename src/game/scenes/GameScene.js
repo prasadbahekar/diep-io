@@ -16,46 +16,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    const cellSize = 24;
-    const worldSize = 400 * cellSize;
+    this.cellSize = 24;
+    this.worldSize = 400 * this.cellSize;
     state.game.player.id = joinPlayer();
     this.prevLvl = 1;
 
-    // Polygons
-    // state.game.polygons = [
-    //   {
-    //     id: 1,
-    //     type: "square",
-    //     x: 0,
-    //     y: 0,
-    //     rotation: 0,
-    //   },
-    //   {
-    //     id: 2,
-    //     type: "square",
-    //     x: worldSize / 2 - 100,
-    //     y: worldSize / 2 - 50,
-    //     rotation: 0,
-    //   },
-    // ];
-
-    // this.polygonObjects = [];
     this.renderedBullets = new Map();
     this.renderedPolygons = new Map();
-
-    // state.game.polygons.forEach((polygonData) => {
-    //   const polygon = new Polygon(
-    //     this,
-    //     polygonData.x,
-    //     polygonData.y,
-    //     polygonData.type,
-    //     polygonData.rotation,
-    //   );
-
-    //   polygon.id = polygonData.id;
-
-    //   this.polygonObjects.push(polygon);
-    // });
 
     // Controls
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -81,18 +48,21 @@ export default class GameScene extends Phaser.Scene {
     });
 
     // Player
-    this.player = new Player(this, worldSize / 2, worldSize / 2);
+    this.player = new Player(this, this.worldSize / 2, this.worldSize / 2);
     this.player.body.setCollideWorldBounds(true);
 
     // Camera
     this.cameras.main.startFollow(this.player, true, 0.15, 0.15);
 
     // World Bounds
-    this.physics.world.setBounds(0, 0, worldSize, worldSize);
+    this.physics.world.setBounds(0, 0, this.worldSize, this.worldSize);
+    this.cameras.main.setBounds(0, 0, this.worldSize, this.worldSize);
 
     // Grid
+    this.chunkScreen = Math.max(innerHeight, innerWidth) + this.cellSize * 6; 
+    const chunkCellSize = Math.floor(this.chunkScreen / this.cellSize);
     this.grid = this.add
-      .grid(0, 0, worldSize, worldSize, 24, 24, 0xcccccc, 1, 0xbbbbbb, 1)
+      .grid(0, 0, chunkCellSize * this.cellSize, chunkCellSize * this.cellSize, 24, 24, 0xcccccc, 1, 0xbbbbbb, 1)
       .setOrigin(0, 0);
 
     this.grid.setDepth(-1);
@@ -110,10 +80,21 @@ export default class GameScene extends Phaser.Scene {
     this.updatePolygons();
     updateGameUI();
 
-    //
     state.game.player.prevX = state.game.player.x;
     state.game.player.prevY = state.game.player.y;
-  }
+
+    this.grid.x = Phaser.Math.Clamp(
+      Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize - this.cellSize * 3,
+      0,
+      this.worldSize - this.grid.width
+    );
+
+    this.grid.y = Phaser.Math.Clamp(
+      Math.floor(this.cameras.main.scrollY / this.cellSize) * this.cellSize - this.cellSize * 3,
+      0,
+      this.worldSize - this.grid.height
+    );
+}
 
   updateLocalTruth() {
     state.game.player.x = packet.player.x;
