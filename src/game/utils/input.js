@@ -4,6 +4,7 @@ export const input = {
   left: false,
   right: false,
   shoot: false,
+  isAutoRotate: false,
   isMouseDown: false,
   mouseX: 0,
   mouseY: 0,

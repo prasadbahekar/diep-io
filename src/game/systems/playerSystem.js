@@ -27,21 +27,28 @@ export function initializePlayer() {
 export function updatePlayers(delta) {
   world.players.forEach((player) => {
     playerMovement(player, delta);
-    playerRotation(player);
+    playerRotation(player, delta);
     playerShoot(player);
     playerMetrics(player);
   });
 }
 
-function playerRotation(player) {
-  const rotation = Phaser.Math.Angle.Between(
-    player.x,
-    player.y,
-    input.mouseX,
-    input.mouseY,
-  );
+function playerRotation(player, delta) {
+  if (input.isAutoRotate) {
+    player.rotation += 1 * delta / 1000;
+  } else {
+    const target = Phaser.Math.Angle.Between(
+      player.x,
+      player.y,
+      input.mouseX,
+      input.mouseY,
+    );
 
-  player.rotation = rotation;
+    const diff = Phaser.Math.Angle.Wrap(target - player.rotation);
+    const value = player.rotation + diff * 0.9999 * delta / 100;
+    player.rotation = Number.isFinite(value) ? value : player.rotation;
+    console.log(player.rotation);
+  }
 }
 
 function playerMovement(player, delta) {

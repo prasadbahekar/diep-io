@@ -20,6 +20,7 @@ export default class GameScene extends Phaser.Scene {
     this.worldSize = 400 * this.cellSize;
     state.game.player.id = joinPlayer();
     this.prevLvl = 1;
+    this.isAutoRotate = false;
 
     this.renderedBullets = new Map();
     this.renderedPolygons = new Map();
@@ -47,6 +48,12 @@ export default class GameScene extends Phaser.Scene {
       this.isMouseDown = false;
     });
 
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "c") {
+        this.isAutoRotate = !this.isAutoRotate;
+      }
+    });
+
     // Player
     this.player = new Player(this, this.worldSize / 2, this.worldSize / 2);
     this.player.body.setCollideWorldBounds(true);
@@ -59,7 +66,7 @@ export default class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, this.worldSize, this.worldSize);
 
     // Grid
-    this.chunkScreen = Math.max(innerHeight, innerWidth) + this.cellSize * 6; 
+    this.chunkScreen = Math.max(innerHeight, innerWidth) + this.cellSize * 30; 
     const chunkCellSize = Math.floor(this.chunkScreen / this.cellSize);
     this.grid = this.add
       .grid(0, 0, chunkCellSize * this.cellSize, chunkCellSize * this.cellSize, 24, 24, 0xcccccc, 1, 0xbbbbbb, 1)
@@ -80,17 +87,18 @@ export default class GameScene extends Phaser.Scene {
     this.updatePolygons();
     updateGameUI();
 
+
     state.game.player.prevX = state.game.player.x;
     state.game.player.prevY = state.game.player.y;
 
     this.grid.x = Phaser.Math.Clamp(
-      Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize - this.cellSize * 3,
+      Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize - this.cellSize * 12,
       0,
       this.worldSize - this.grid.width
     );
 
     this.grid.y = Phaser.Math.Clamp(
-      Math.floor(this.cameras.main.scrollY / this.cellSize) * this.cellSize - this.cellSize * 3,
+      Math.floor(this.cameras.main.scrollY / this.cellSize) * this.cellSize - this.cellSize * 12,
       0,
       this.worldSize - this.grid.height
     );
@@ -122,6 +130,7 @@ export default class GameScene extends Phaser.Scene {
     input.mouseX = worldPoint.x;
     input.mouseY = worldPoint.y;
     input.shoot = this.isMouseDown;
+    input.isAutoRotate = this.isAutoRotate;
   }
 
   updateBullets() {
