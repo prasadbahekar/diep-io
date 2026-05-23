@@ -4,7 +4,7 @@ import { state } from "../state";
 import { input } from "../utils/input";
 import Phaser, { Time } from "phaser";
 
-export function initializePlayer() {
+export function initializePlayer(renderDistance) {
   const player = {
     x: world.properties.worldSize / 2,
     y: world.properties.worldSize / 2,
@@ -15,6 +15,7 @@ export function initializePlayer() {
     lastShoot: 0,
     level: 1,
     score: 0,
+    renderDistance: renderDistance,
     id: crypto.randomUUID(),
   };
 
@@ -47,7 +48,6 @@ function playerRotation(player, delta) {
     const diff = Phaser.Math.Angle.Wrap(target - player.rotation);
     const value = player.rotation + diff * 0.9999 * delta / 100;
     player.rotation = Number.isFinite(value) ? value : player.rotation;
-    console.log(player.rotation);
   }
 }
 

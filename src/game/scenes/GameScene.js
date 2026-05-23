@@ -18,7 +18,10 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.cellSize = 24;
     this.worldSize = 400 * this.cellSize;
-    state.game.player.id = joinPlayer();
+
+    // Initialize Render Distance
+    const renderDistance = Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
+    state.game.player.id = joinPlayer(renderDistance);
     this.prevLvl = 1;
     this.isAutoRotate = false;
 
@@ -116,7 +119,7 @@ export default class GameScene extends Phaser.Scene {
     state.game.polygons = packet.polygons;
     state.game.packetNow = packet.player.now;
   }
-
+ 
   updateInput() {
     input.up = this.cursors.up.isDown || this.keys.up.isDown;
     input.down = this.cursors.down.isDown || this.keys.down.isDown;
@@ -134,60 +137,76 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateBullets() {
+    const bullets = state.game.bullets;
+    const rendered = this.renderedBullets;
     state.player.shoot = false;
-    const bulletIds = new Set(packet.bullets.map((b) => b.id));
-    for (const key of this.renderedBullets.keys()) {
-      if (!bulletIds.has(key)) {
-        this.renderedBullets.delete(key);
+
+    const serverIds = new Set();
+    for (let i = 0; i < bullets.length; i++) {
+      const b = bullets[i];
+      serverIds.add(b.id);
+
+      let bulletObj = rendered.get(b.id);
+
+      if (bulletObj) {
+        bulletObj.update(b.x, b.y, b.lifespan);
+      } else {
+        bulletObj = new Bullet(
+          this,
+          b.id,
+          b.x,
+          b.y,
+          b.lifespan,
+          this.player.weapon.height * 0.8
+        );
+
+        rendered.set(b.id, bulletObj);
+        if (b.parent === state.game.player.id) {
+          state.game.player.lastShoot = Date.now();
+        }
       }
     }
 
-    packet.bullets.forEach((bullet) => {
-      if (this.renderedBullets.has(bullet.id)) {
-        const bulletObj = this.renderedBullets.get(bullet.id);
-        bulletObj.update(bullet.x, bullet.y, bullet.lifespan);
-      } else {
-        const bulletObj = new Bullet(
-          this,
-          bullet.id,
-          bullet.x,
-          bullet.y,
-          bullet.lifespan,
-          this.player.weapon.height * 0.8,
-        );
-        this.renderedBullets.set(bullet.id, bulletObj);
-        if (bullet.parent == state.game.player.id) {
-          state.game.player.lastShoot = new Date().getTime();
-        }
+    for (const [id, bulletObj] of rendered) {
+      if (!serverIds.has(id)) {
+        if (bulletObj.destroy) bulletObj.destroy();
+        rendered.delete(id);
       }
-    });
+    }
   }
 
   updatePolygons() {
-    const polyIds = new Set(packet.polygons.map((b) => b.id));
+    const polygons = state.game.polygons;
+    const serverIds = new Set();
+    const serverMap = new Map();
 
-    for (const key of this.renderedPolygons.keys()) {
-      if (!polyIds.has(key)) {
-        this.renderedPolygons.delete(key);
+    for (const p of polygons) {
+      serverIds.add(p.id);
+      serverMap.set(p.id, p);
+    }
+
+    for (const [id, polyObj] of this.renderedPolygons) {
+      if (!serverIds.has(id)) {
+        if (polyObj.destroy) {
+          polyObj.destroy();
+          polyObj.healthBar.destroy();
+        }
+        this.renderedPolygons.delete(id);
       }
     }
 
-    packet.polygons.forEach((polygon) => {
-      if (this.renderedPolygons.has(polygon.id)) {
-        const polygonObj = this.renderedPolygons.get(polygon.id);
-        polygonObj.update(polygon.x, polygon.y, polygon.rotation);
+    for (const [id, p] of serverMap) {
+      const polyObj = this.renderedPolygons.get(id);
+
+      if (polyObj) {
+        polyObj.update(p.x, p.y, p.rotation);
       } else {
-        const polygonObj = new Polygon(
-          this,
-          polygon.id,
-          polygon.x,
-          polygon.y,
-          polygon.type,
-          polygon.rotation,
+        this.renderedPolygons.set(
+          id,
+          new Polygon(this, p.id, p.x, p.y, p.type, p.rotation)
         );
-        this.renderedPolygons.set(polygon.id, polygonObj);
       }
-    });
+    }
   }
 
   // updateGameMetrics(delta) {
