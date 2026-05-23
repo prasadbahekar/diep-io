@@ -42,7 +42,7 @@ export default class GameScene extends Phaser.Scene {
       this.mouseX = e.clientX;
       this.mouseY = e.clientY;
     });
-
+    
     window.addEventListener("mousedown", () => {
       this.isMouseDown = true;
     });
@@ -199,7 +199,7 @@ export default class GameScene extends Phaser.Scene {
       const polyObj = this.renderedPolygons.get(id);
 
       if (polyObj) {
-        polyObj.update(p.x, p.y, p.rotation);
+        polyObj.update(p.x, p.y, p.rotation, p.hp);
       } else {
         this.renderedPolygons.set(
           id,

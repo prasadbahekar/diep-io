@@ -117,10 +117,10 @@ function playerShoot(player) {
       y: bulletY,
       velX: velX,
       velY: velY,
+      force: 1,
     });
 
     const recoilForce = 10;
-    player.score += 5;
     player.velX -= Math.cos(player.rotation) * recoilForce;
     player.velY -= Math.sin(player.rotation) * recoilForce;
   }

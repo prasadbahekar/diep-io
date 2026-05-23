@@ -1,33 +1,21 @@
 import { updateBullets } from "../systems/bulletSystem";
 import { updatePlayers, initializePlayer } from "../systems/playerSystem";
-import { updatePolygons } from "../systems/polygonSystem";
+import { createPolygon, updatePolygons } from "../systems/polygonSystem";
 import { chunkKey, chunkKeyWorld, initializeChunks, updateChunks } from "../systems/chunkSystem";
 import { packet } from "./packet";
 import { world } from "./world";
 
 export function joinPlayer(renderDistance) {
-  const polyId = crypto.randomUUID();
-  world.polygons.set(polyId, {
-    id: polyId,
-    x: 4700,
-    y: 4700,
-    velX: 8,
-    velY: 8,
-    hp: 100,
-    rotation: 0,
-    type: "triangle",
-  });
+  createPolygon(4600, 4600, "square")
   return initializePlayer(renderDistance);
 }
 
 export function updateServer(delta) {
   initializeChunks();
   updatePlayers(delta);
-  updateBullets(delta);
   updatePolygons(delta);
+  updateBullets(delta);
   createPacket();
-
-  const nonEmptyChunks = [...world.chunks.entries()].filter(([key, set]) => set.size > 0);
 }
 
 function createPacket() {
@@ -63,30 +51,5 @@ function createPacket() {
         }
       }
     }
-  });
-        // console.log(world.chunks.get(chunkKey(36, 36)))
-
-  return null;
-
-  packet.bullets = [];
-  world.bullets.forEach((bullet) => {
-    packet.bullets.push({
-      x: bullet.x,
-      y: bullet.y,
-      lifespan: bullet.lifespan,
-      parent: bullet.parent,
-      id: bullet.id,
-    });
-  });
-
-  packet.polygons = [];
-  world.polygons.forEach((polygon) => {
-    packet.polygons.push({
-      id: polygon.id,
-      x: polygon.x,
-      y: polygon.y,
-      rotation: polygon.rotation,
-      type: polygon.type,
-    });
   });
 }

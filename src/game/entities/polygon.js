@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { polygons } from "../data/polygons";
 
 export default class Polygon extends Phaser.GameObjects.Container {
   constructor(scene, id, x, y, type, rotation = 0) {
@@ -80,18 +81,20 @@ export default class Polygon extends Phaser.GameObjects.Container {
     this.rotation = rotation;
   }
 
-  update(x, y, rotation) {
+  update(x, y, rotation, hp) {
     this.x = x;
     this.y = y;
     this.rotation = rotation;
+    this.hp = hp;
     this.healthBar.x = x;
     this.healthBar.y = y;
-    this.renderHealthBar(0.5);
+    console.log(polygons[this.type].hp)
+    this.renderHealthBar(this.hp / polygons[this.type].hp);
   }
 
   renderHealthBar(percent) {
     this.healthBar.clear();
-
+    if (percent >= 1) return;
     const width = 38;
     const height = 4;
     const radius = height / 2;
