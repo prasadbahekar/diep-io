@@ -85,7 +85,7 @@ export default class GameScene extends Phaser.Scene {
     this.updateInput();
     updateServer(delta);
     this.updateLocalTruth();
-    this.player.update();
+    this.player.update(delta);
     this.updateBullets();
     this.updatePolygons();
     updateGameUI();

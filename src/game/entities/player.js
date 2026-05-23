@@ -64,21 +64,26 @@ export default class Player extends Phaser.GameObjects.Container {
     });
   }
 
-  update() {
-    // Update Loop
+  update(delta) {
     this.x = state.game.player.x;
     this.y = state.game.player.y;
-    this.weapons.rotation = state.game.player.rotation;
+    this.updateRotation(delta);
     this.updateDelta();
     this.shoot();
     this.renderUpdate();
+  }
+
+  updateRotation(delta) {
+    const target = state.game.player.rotation;
+    const diff = Phaser.Math.Angle.Wrap(target - this.weapons.rotation);
+    const value = this.weapons.rotation + diff * 0.9999 * delta / 100;
+    this.weapons.rotation = Number.isFinite(value) ? value : this.weapons.rotation;
   }
 
   updateDelta() {
     this.now = Date.now();
     this.elapsed = this.now - state.game.packetNow;
     if (this.elapsed <= 0) this.elapsed = 1;
-
     this.velX = (this.x - state.game.player.prevX) / (this.elapsed / 70);
     this.velY = (this.y - state.game.player.prevY) / (this.elapsed / 70);
   }
@@ -95,11 +100,10 @@ export default class Player extends Phaser.GameObjects.Container {
     this.weapon.scaleX = Phaser.Math.Linear(this.weapon.scaleX, 1, 0.05);
     this.scale = getLevelData(state.game.player.level).tankSize;
 
-    // Camera Zoom (ChatGPT)
+    // Camera Zoom
     const speed = Math.sqrt(this.velX * this.velX + this.velY * this.velY);
     const speedFactor = Phaser.Math.Clamp(speed / 180, 0, 1);
     const baseZoom = 2 / this.scale;
-    // const shootFactor = this.justShoot ? 0.1 : 0;
     const targetZoom = baseZoom - speedFactor * 0.03; // - shootFactor;
     this.scene.cameras.main.zoom = Phaser.Math.Linear(
       this.scene.cameras.main.zoom,

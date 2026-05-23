@@ -38,16 +38,22 @@ function playerRotation(player, delta) {
   if (input.isAutoRotate) {
     player.rotation += 1 * delta / 1000;
   } else {
-    const target = Phaser.Math.Angle.Between(
+    // const target = Phaser.Math.Angle.Between(
+    //   player.x,
+    //   player.y,
+    //   input.mouseX,
+    //   input.mouseY,
+    // );
+
+    // const diff = Phaser.Math.Angle.Wrap(target - player.rotation);
+    // const value = player.rotation + diff * 0.9999 * delta / 100;
+    // player.rotation = Number.isFinite(value) ? value : player.rotation;
+    player.rotation = Phaser.Math.Angle.Between(
       player.x,
       player.y,
       input.mouseX,
       input.mouseY,
     );
-
-    const diff = Phaser.Math.Angle.Wrap(target - player.rotation);
-    const value = player.rotation + diff * 0.9999 * delta / 100;
-    player.rotation = Number.isFinite(value) ? value : player.rotation;
   }
 }
 
