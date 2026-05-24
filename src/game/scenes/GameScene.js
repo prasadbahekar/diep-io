@@ -87,7 +87,7 @@ export default class GameScene extends Phaser.Scene {
     this.updateLocalTruth();
     this.player.update(delta);
     this.updateBullets();
-    this.updatePolygons();
+    this.updatePolygons(delta);
     updateGameUI();
 
 
@@ -175,7 +175,7 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  updatePolygons() {
+  updatePolygons(delta) {
     const polygons = state.game.polygons;
     const serverIds = new Set();
     const serverMap = new Map();
@@ -199,7 +199,7 @@ export default class GameScene extends Phaser.Scene {
       const polyObj = this.renderedPolygons.get(id);
 
       if (polyObj) {
-        polyObj.update(p.x, p.y, p.rotation, p.hp);
+        polyObj.update(p.x, p.y, p.rotation, p.hp, delta);
       } else {
         this.renderedPolygons.set(
           id,

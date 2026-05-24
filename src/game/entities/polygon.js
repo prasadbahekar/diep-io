@@ -80,23 +80,33 @@ export default class Polygon extends Phaser.GameObjects.Container {
     this.rotation = rotation;
   }
 
-  update(x, y, rotation, hp) {
+  update(x, y, rotation, hp, delta) {
     this.x = x;
     this.y = y;
     this.rotation = rotation;
     this.hp = hp;
+
     this.healthBar.x = x;
     this.healthBar.y = y;
-    this.renderHealthBar(this.hp / polygons[this.type].hp);
+
+    if (this.displayHp === undefined) {
+      this.displayHp = hp;
+    }
+
+    this.displayHp += (hp - this.displayHp) * 0.99 * (delta / 100);
+
+    this.renderHealthBar(
+      this.displayHp / polygons[this.type].hp
+    );
   }
 
   renderHealthBar(percent) {
     this.healthBar.clear();
-    if (percent >= 1) return;
+    if (percent >= 0.99) return;
+
     const width = 38;
     const height = 4;
     const radius = height / 2;
-
     const x = -width / 2;
     const y = 24;
 
