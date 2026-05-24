@@ -4,9 +4,11 @@ import { createPolygon, updatePolygons } from "../systems/polygonSystem";
 import { chunkKey, chunkKeyWorld, initializeChunks, updateChunks } from "../systems/chunkSystem";
 import { packet } from "./packet";
 import { world } from "./world";
+import { getRandomInt } from "../utils/functions";
 
 export function joinPlayer(renderDistance) {
-  createPolygon(4600, 4600, "square")
+  const types = ["square", "square", "triangle", "triangle", "pentagon"];
+  for (let i = 0; i < 100; i++) createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), types[getRandomInt(0, types.length - 1)]);
   return initializePlayer(renderDistance);
 }
 
@@ -40,6 +42,7 @@ function createPacket() {
         const chunkX = playerChunkX + dx;
         const chunkY = playerChunkY + dy;
         const chunk = world.chunks.get(chunkKey(chunkX, chunkY));
+        if (!chunk) continue;
         for (const element of chunk) {
           if (element.elType === "bullet") {
             packet.bullets.push(element);

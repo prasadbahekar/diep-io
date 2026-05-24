@@ -25,7 +25,7 @@ export default class Polygon extends Phaser.GameObjects.Container {
 
         bodyObj = new Phaser.GameObjects.Polygon(scene, 0, 0, points, 0xeb6767);
         bodyObj.setPosition(bodyObj.width / 2, bodyObj.height / 2);
-
+        bodyObj.setStrokeStyle(2, 0xbb5453);
         break;
       }
 
@@ -38,25 +38,23 @@ export default class Polygon extends Phaser.GameObjects.Container {
           28,
           0xe7d063,
         );
-
+        bodyObj.setStrokeStyle(2, 0xbdad4a);
         break;
       }
 
       case "pentagon": {
-        const r = 20;
+        const r = 30;
         const points = [];
 
         for (let i = 0; i < 5; i++) {
           const angle = (Math.PI * 2 * i) / 5;
-
           points.push(Math.cos(angle) * r, Math.sin(angle) * r);
         }
 
-        bodyObj = new Phaser.GameObjects.Polygon(scene, 0, 0, points, 0x66eae6);
-
+        bodyObj = new Phaser.GameObjects.Polygon(scene, 0, 0, points, 0x6690ea);
+        bodyObj.setStrokeStyle(3, 0x566abc);
         const bounds = bodyObj.getBounds();
         bodyObj.setPosition(-bounds.x, -bounds.y);
-
         break;
       }
 
@@ -69,14 +67,15 @@ export default class Polygon extends Phaser.GameObjects.Container {
           20,
           0xffffff,
         );
+        bodyObj.setStrokeStyle(2, 0x666666);
       }
     }
 
-    bodyObj.setStrokeStyle(2, 0x666666);
     this.add(bodyObj);
     this.bodyObj = bodyObj;
     this.healthBar = scene.add.graphics();
     this.healthBar.setAlpha(0.8);
+    this.healthBar.setDepth(3);
     scene.add.existing(this);
     this.rotation = rotation;
   }
@@ -88,7 +87,6 @@ export default class Polygon extends Phaser.GameObjects.Container {
     this.hp = hp;
     this.healthBar.x = x;
     this.healthBar.y = y;
-    console.log(polygons[this.type].hp)
     this.renderHealthBar(this.hp / polygons[this.type].hp);
   }
 

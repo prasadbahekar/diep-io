@@ -28,6 +28,10 @@ export function updateBullets(delta) {
 function checkBulletCollisions(bulletId) {
   const bullet = world.bullets.get(bulletId);
   const chunk = world.chunks.get(chunkKeyWorld(bullet.x, bullet.y));
+  if (bullet.x < 0 || bullet.x > 9600 || bullet.y < 0 || bullet.y > 9600) {
+    world.bullets.delete(bulletId);
+    return;
+  }
   for (const element of chunk) {
     if (element.elType == "polygon") {
       const dx = element.x - bullet.x;

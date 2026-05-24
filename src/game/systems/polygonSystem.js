@@ -1,5 +1,6 @@
 import { polygons } from "../data/polygons";
 import { world } from "../server/world";
+import { getRandomInt } from "../utils/functions";
 import { chunkKeyWorld } from "./chunkSystem";
 
 export function createPolygon(x, y, type) {
@@ -8,8 +9,8 @@ export function createPolygon(x, y, type) {
     id: polyId,
     x: x,
     y: y,
-    velX: 8,
-    velY: 8,
+    velX: getRandomInt(-12, 12),
+    velY: getRandomInt(-12, 12),
     hp: polygons[type].hp,
     rotation: 0,
     type: type,
@@ -21,6 +22,11 @@ export function updatePolygons(delta) {
     polygon.x += (polygon.velX * delta) / 1000;
     polygon.y += (polygon.velY * delta) / 1000;
     polygon.rotation += (1 * delta) / 1000;
+
+    if (polygon.x < 0 || polygon.x > 9600 || polygon.y < 0 || polygon.y > 9600) {
+      world.polygons.delete(polygon.id);
+      return;
+    }
 
     if (polygon.hp <= 0) {
       if (polygon.lastHitBy) {
