@@ -7,6 +7,8 @@ export const packet = {
     score: 0,
     lastShoot: 0,
     upgrades: 0,
+    hp: 0,
+    maxHp: 0,
     now: 0,
     upLvls: "0000000",
   },

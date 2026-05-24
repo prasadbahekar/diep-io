@@ -33,6 +33,8 @@ function createPacket() {
       upLvls: player.upLvl,
       lastShoot: player.lastShoot,
       upgrades: player.upgrades,
+      hp: player.hp,
+      maxHp: player.maxHp,
       now: Date.now(),
     };
 

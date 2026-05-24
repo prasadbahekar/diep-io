@@ -222,6 +222,7 @@ function updateProgressBar() {
   }
 
   if (targetWidth < 5) targetWidth = 5;
+  if (targetWidth > 100) targetWidth = 100;
   const levelProgEl = document.getElementById("levelProgress");
   currentWidth = Phaser.Math.Linear(currentWidth, targetWidth, lerpSpeed);
   levelProgEl.style.width = `${currentWidth}%`;
@@ -236,26 +237,14 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
-  if (mKey && e.key == "m") {
-    mKey = false;
-  }
+  if (mKey && e.key == "m") mKey = false;
 });
 
 document.addEventListener("keydown", (e) => {
   const key = parseInt(e.key);
-
-  // Ignore non-number keys
   if (isNaN(key)) return;
-
-  // Only allow 1-8
   if (key < 1 || key > 8) return;
-
-  // No upgrades available
   if (state.game.player.upgrades <= 0) return;
-
   const upgrade = upgradeElements[key - 1];
-
-  if (upgrade) {
-    input.upgrade = upgrade.dataset.upgrade;
-  }
+  if (upgrade) input.upgrade = upgrade.dataset.upgrade;
 });

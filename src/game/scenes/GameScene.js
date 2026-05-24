@@ -76,7 +76,7 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.grid.setDepth(-1);
-    this.player.setDepth(1);
+    this.player.setDepth(4);
 
     createGameUI();
   }
@@ -117,6 +117,9 @@ export default class GameScene extends Phaser.Scene {
     state.game.player.lastShoot = packet.player.lastShoot;
     state.game.player.upgrades = packet.player.upgrades;
     state.game.player.upLvl = packet.player.upLvls;
+    state.game.player.hp = packet.player.hp;
+    state.game.player.maxHp = packet.player.maxHp;
+
     state.game.bullets = packet.bullets;
     state.game.polygons = packet.polygons;
     state.game.packetNow = packet.player.now;

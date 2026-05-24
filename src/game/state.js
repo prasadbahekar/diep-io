@@ -19,6 +19,8 @@ export const state = {
       y: 0,
       prevX: 0,
       prevY: 0,
+      hp: 0, 
+      maxHp: 0,
       rotation: 0,
       score: 0,
       level: 1,

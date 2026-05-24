@@ -1,14 +1,14 @@
 export const polygons = {
     "square" : {
-        hp: 1.6,
+        hp: 10,
         xp: 10
     },
     "triangle" : {
-        hp: 5,
+        hp: 30,
         xp: 25
     },
     "pentagon" : {
-        hp: 22,
+        hp: 150,
         xp: 130
     },
 }

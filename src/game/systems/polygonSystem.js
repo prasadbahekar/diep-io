@@ -28,7 +28,6 @@ export function updatePolygons(delta) {
       return;
     }
 
-    // Cap velocity to 12
     polygon.velX = Math.max(-12, Math.min(12, polygon.velX));
     polygon.velY = Math.max(-12, Math.min(12, polygon.velY));
 

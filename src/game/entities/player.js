@@ -90,9 +90,9 @@ export default class Player extends Phaser.GameObjects.Container {
 
   shoot() {
     const elapsed = this.now - state.game.player.lastShoot;
-    if (elapsed <= 1000 / 1.05) {
+    if (elapsed <= 600 / 1.05) {
       this.weapon.x =
-        this.weaponOriginalX + Math.sin((Math.PI * elapsed) / 1000) * -2;
+        this.weaponOriginalX + Math.sin((Math.PI * elapsed) / 600) * -2;
     } else this.weapon.x = this.weaponOriginalX;
   }
 
@@ -118,8 +118,8 @@ export default class Player extends Phaser.GameObjects.Container {
     this.bullets = this.bullets.filter((bullet) => !bullet.dead);
 
     // Render Health
-    if (state.game.health == state.game.maxHealth) this.healthBar.clear();
-    else this.renderHealthBar(state.game.health / state.game.maxHealth);
+    if (state.game.player.hp == state.game.player.maxHp) this.healthBar.clear();
+    else this.renderHealthBar(state.game.player.hp / state.game.player.maxHp);
   }
 
   renderHealthBar(percent) {

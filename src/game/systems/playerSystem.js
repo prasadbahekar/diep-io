@@ -15,6 +15,11 @@ export function initializePlayer(renderDistance) {
     level: 1,
     score: 0,
     upgrades: 0,
+    hp: 50, 
+    maxHp: 50,
+    reload: 0.6,
+    damage: 7,
+    upLvl: "00000000",
     renderDistance: renderDistance,
     id: crypto.randomUUID(),
   };
@@ -39,16 +44,6 @@ function playerRotation(player, delta) {
   if (input.isAutoRotate) {
     player.rotation += 1 * delta / 1000;
   } else {
-    // const target = Phaser.Math.Angle.Between(
-    //   player.x,
-    //   player.y,
-    //   input.mouseX,
-    //   input.mouseY,
-    // );
-
-    // const diff = Phaser.Math.Angle.Wrap(target - player.rotation);
-    // const value = player.rotation + diff * 0.9999 * delta / 100;
-    // player.rotation = Number.isFinite(value) ? value : player.rotation;
     player.rotation = Phaser.Math.Angle.Between(
       player.x,
       player.y,
@@ -99,10 +94,34 @@ function playerMovement(player, delta) {
   player.y = Phaser.Math.Clamp(player.y, 0, world.properties.worldSize);
 }
 
-function playerMetrics(player) {
+function playerMetrics(player, updateStats = false) {
   if (getLevelFromScore(player.score) > player.level) {
     player.upgrades += getLevelFromScore(player.score) - player.level;
     player.level = getLevelFromScore(player.score);
+    // Max Health
+    const hpRatio = player.hp / player.maxHp;
+    const maxHealthLvl = parseInt(player.upLvl[1] || "0");
+    const baseHealth = 50 + (2 * (player.level - 1))
+    const bonusHealth = maxHealthLvl * 20;
+    player.maxHp = baseHealth + bonusHealth;
+    player.hp = hpRatio * player.maxHp;
+  }
+  if (updateStats) {
+    // Max Health
+    const hpRatio = player.hp / player.maxHp;
+    const maxHealthLvl = parseInt(player.upLvl[1] || "0");
+    const baseHealth = 50 + (2 * (player.level - 1))
+    const bonusHealth = maxHealthLvl * 20;
+    player.maxHp = baseHealth + bonusHealth;
+    player.hp = hpRatio * player.maxHp;
+
+    // Bullet Damage
+    const bulletDmgLvl = parseInt(player.upLvl[5] || "0");
+    player.damage = 7 + (bulletDmgLvl * 3);
+
+    // Reload Speed
+    const reloadLvl = parseInt(player.upLvl[6] || "0");
+    player.reload = 0.6 - (reloadLvl * 0.04);
   }
 }
 
@@ -133,12 +152,12 @@ function updateUpgrades(player) {
   levels[index] = currentLevel.toString();
   player.upLvl = levels.join("");
   player.upgrades -= 1;
-  console.log(player.upLvl);
+  playerMetrics(player, true);
 }
 
 function playerShoot(player) {
   const now = Date.now();
-  if (input.shoot && now - player.lastShoot >= 1000) {
+  if (input.shoot && now - player.lastShoot >= player.reload * 1000) {
     player.isShooting = true;
     player.lastShoot = now;
 
@@ -157,7 +176,7 @@ function playerShoot(player) {
       y: bulletY,
       velX: velX,
       velY: velY,
-      force: 1,
+      force: player.damage,
     });
 
     const recoilForce = 10;
@@ -167,6 +186,6 @@ function playerShoot(player) {
 
   if (player.isShooting) {
     const elapsed = now - player.lastShoot;
-    if (elapsed >= 1000 / 1.05) player.isShooting = false;
+    if (elapsed >= player.reload * 1000 / 1.05) player.isShooting = false;
   }
 }
