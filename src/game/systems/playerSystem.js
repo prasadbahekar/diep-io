@@ -1,6 +1,5 @@
 import { getLevelFromScore } from "../data/levels";
 import { world } from "../server/world";
-import { state } from "../state";
 import { input } from "../utils/input";
 import Phaser, { Time } from "phaser";
 
@@ -15,6 +14,7 @@ export function initializePlayer(renderDistance) {
     lastShoot: 0,
     level: 1,
     score: 0,
+    upgrades: 0,
     renderDistance: renderDistance,
     id: crypto.randomUUID(),
   };
@@ -31,6 +31,7 @@ export function updatePlayers(delta) {
     playerRotation(player, delta);
     playerShoot(player);
     playerMetrics(player);
+    updateUpgrades(player);
   });
 }
 
@@ -99,7 +100,40 @@ function playerMovement(player, delta) {
 }
 
 function playerMetrics(player) {
-  player.level = getLevelFromScore(player.score);
+  if (getLevelFromScore(player.score) > player.level) {
+    player.upgrades += getLevelFromScore(player.score) - player.level;
+    player.level = getLevelFromScore(player.score);
+  }
+}
+
+function updateUpgrades(player) {
+  if (player.upgrades <= 0) return;
+
+  const upgradeIndexMap = {
+    "Health Regen": 0,
+    "Max Health": 1,
+    "Bullet Speed": 2,
+    "Body Damage": 3,
+    "Bullet Penetration": 4,
+    "Bullet Damage": 5,
+    "Reload Speed": 6,
+    "Movement Speed": 7,
+  };
+
+  const index = upgradeIndexMap[input.upgrade];
+
+  if (index === undefined) return;
+  if (!player.upLvl) {
+    player.upLvl = "00000000";
+  }
+  const levels = player.upLvl.split("");
+  let currentLevel = parseInt(levels[index]);
+  if (currentLevel >= 7) return;
+  currentLevel += 1;
+  levels[index] = currentLevel.toString();
+  player.upLvl = levels.join("");
+  player.upgrades -= 1;
+  console.log(player.upLvl);
 }
 
 function playerShoot(player) {

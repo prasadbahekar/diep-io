@@ -8,4 +8,5 @@ export const input = {
   isMouseDown: false,
   mouseX: 0,
   mouseY: 0,
+  upgrade: null,
 };

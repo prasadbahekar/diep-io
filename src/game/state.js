@@ -8,7 +8,6 @@ export const state = {
     worldSize: 9600,
     started: false,
     // level: 1,
-    upgrades: 0,
     baseHealth: 0,
     health: 0,
     maxHealth: 0,
@@ -24,6 +23,7 @@ export const state = {
       score: 0,
       level: 1,
       lastShoot: 0,
+      upgrades: 0,
     },
     stats: {
       regen: 0,

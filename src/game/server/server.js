@@ -30,7 +30,9 @@ function createPacket() {
       rotation: player.rotation,
       level: player.level,
       score: player.score,
+      upLvls: player.upLvl,
       lastShoot: player.lastShoot,
+      upgrades: player.upgrades,
       now: Date.now(),
     };
 
@@ -43,6 +45,7 @@ function createPacket() {
         const chunkY = playerChunkY + dy;
         const chunk = world.chunks.get(chunkKey(chunkX, chunkY));
         if (!chunk) continue;
+
         for (const element of chunk) {
           if (element.elType === "bullet") {
             packet.bullets.push(element);

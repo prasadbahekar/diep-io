@@ -2,6 +2,7 @@ import { COLORS } from "../data/colors";
 import { getLevelData, getPointsToNextLevel } from "../data/levels";
 import { state } from "../state";
 import Phaser from "phaser";
+import { input } from "../utils/input";
 
 const upgradesContainer = document.getElementById("upgrades");
 let showPanel = false;
@@ -88,8 +89,8 @@ export function createGameUI() {
   for (const elem of upgradeElements) {
     const add = elem.querySelector(".add");
     add.addEventListener("click", () => {
-      if (state.game.upgrades > 0) {
-        updateUpgrades(elem.dataset.upgrade);
+      if (state.game.player.upgrades > 0) { 
+        input.upgrade = elem.dataset.upgrade;
       }
     });
   }
@@ -109,7 +110,7 @@ export function updateGameUI() {
 
   updateProgressBar();
 
-  if (showPanel || mKey || state.game.upgrades > 0) {
+  if (showPanel || mKey || state.game.player.upgrades > 0) {
     upgradesContainer.classList.add("active");
   } else {
     upgradesContainer.classList.remove("active");
@@ -117,15 +118,16 @@ export function updateGameUI() {
 
   for (const elem of upgradeElements) {
     const add = elem.querySelector(".add");
-    const disabled = state.game.upgrades == 0;
+    const disabled = state.game.player.upgrades == 0;
     add.classList.toggle("disabled", disabled);
     add.style.backgroundColor = disabled ? "#999" : elem.dataset.color;
   }
 
   const upgradeCount = document.getElementById("upgrade-count");
   upgradeCount.textContent =
-    state.game.upgrades > 1 ? `${state.game.upgrades}x` : "";
+    state.game.player.upgrades > 1 ? `${state.game.player.upgrades}x` : "";
 
+  syncUpgradeBars();
   // Update Map
   const leftPercent = state.game.player.x / 9600 * 100
   const topPercent = state.game.player.y / 9600 * 100
@@ -135,22 +137,60 @@ export function updateGameUI() {
 }
 
 function updateUpgrades(title) {
-  state.game.upgrades -= 1;
+  if (state.game.player.upgrades <= 0) return;
 
+  const upgradeIndexMap = {
+    "Health Regen": 0,
+    "Max Health": 1,
+    "Bullet Speed": 2,
+    "Body Damage": 3,
+    "Bullet Penetration": 4,
+    "Bullet Damage": 5,
+    "Reload Speed": 6,
+    "Movement Speed": 7,
+  };
+
+  const index = upgradeIndexMap[title];
+
+  if (index === undefined) return;
+  if (!state.game.player.upLvl) {
+    state.game.player.upLvl = "00000000";
+  }
+  const levels = state.game.player.upLvl.split("");
+  let currentLevel = parseInt(levels[index]);
+  if (currentLevel >= 7) return;
+  currentLevel += 1;
+  levels[index] = currentLevel.toString();
+  state.game.player.upLvl = levels.join("");
+  state.game.player.upgrades -= 1;
   const upgrade = upgradeElements.find(
     (elem) => elem.dataset.upgrade === title,
   );
 
+  if (!upgrade) return;
+
   const bars = upgrade.querySelectorAll(".bar");
 
-  state.game.stats[statMap[title]] += 1;
+  bars.forEach((bar, i) => {
+    bar.style.opacity = i < currentLevel ? "1" : "0";
+  });
+}
 
-  for (const bar of bars) {
-    if (bar.style.opacity === "0") {
-      bar.style.opacity = "1";
-      break;
-    }
+function syncUpgradeBars() {
+  if (!state.game.player.upLvl) {
+    state.game.player.upLvl = "00000000";
   }
+
+  const levels = state.game.player.upLvl.split("");
+
+  upgradeElements.forEach((upgradeElem, index) => {
+    const bars = upgradeElem.querySelectorAll(".bar");
+    const level = parseInt(levels[index]) || 0;
+
+    bars.forEach((bar, i) => {
+      bar.style.opacity = i < level ? "1" : "0";
+    });
+  });
 }
 
 function updateProgressBar() {
@@ -211,11 +251,11 @@ document.addEventListener("keydown", (e) => {
   if (key < 1 || key > 8) return;
 
   // No upgrades available
-  if (state.game.upgrades <= 0) return;
+  if (state.game.player.upgrades <= 0) return;
 
   const upgrade = upgradeElements[key - 1];
 
   if (upgrade) {
-    updateUpgrades(upgrade.dataset.upgrade);
+    input.upgrade = upgrade.dataset.upgrade;
   }
 });

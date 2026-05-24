@@ -93,6 +93,7 @@ export default class GameScene extends Phaser.Scene {
 
     state.game.player.prevX = state.game.player.x;
     state.game.player.prevY = state.game.player.y;
+    input.upgrade = null;
 
     this.grid.x = Phaser.Math.Clamp(
       Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize - this.cellSize * 12,
@@ -114,7 +115,8 @@ export default class GameScene extends Phaser.Scene {
     state.game.player.score = packet.player.score;
     state.game.player.level = packet.player.level;
     state.game.player.lastShoot = packet.player.lastShoot;
-
+    state.game.player.upgrades = packet.player.upgrades;
+    state.game.player.upLvl = packet.player.upLvls;
     state.game.bullets = packet.bullets;
     state.game.polygons = packet.polygons;
     state.game.packetNow = packet.player.now;

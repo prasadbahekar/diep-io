@@ -8,6 +8,11 @@ export function updateBullets(delta) {
     bullet.lifespan -= (delta / 1000) * 25;
     checkBulletCollisions(bullet.id);
 
+    if (bullet.x < 0 || bullet.x > 9600 || bullet.y < 0 || bullet.y > 9600) {
+      world.bullets.delete(bullet.id);
+      return;
+    }
+
     if (bullet.lifespan <= 0 || bullet.force <= 0) {
       world.bullets.delete(bullet.id);
     } else {
@@ -37,7 +42,8 @@ function checkBulletCollisions(bulletId) {
       const dx = element.x - bullet.x;
       const dy = element.y - bullet.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < 20) {
+      const threshold = element.type === "square" ? 20 : element.type === "triangle" ? 22 : 30;
+      if (distance < threshold) {
         const damage = (bullet.force > element.hp) ? element.hp : bullet.force; 
         world.polygons.get(element.id).hp -= damage;
         world.polygons.get(element.id).lastHitBy = bullet.parent;
