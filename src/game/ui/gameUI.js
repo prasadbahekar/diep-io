@@ -23,6 +23,10 @@ const statMap = {
   "Movement Speed": "movementSpeed",
 };
 
+// Initialize Elements
+const map = document.getElementById("map");
+const playerLocator = document.getElementById("playerPoint");
+
 function createUpgrade(title, hotkey, color = "#000000") {
   const upgrade = document.createElement("div");
   upgrade.className = "upgrade";
@@ -121,6 +125,13 @@ export function updateGameUI() {
   const upgradeCount = document.getElementById("upgrade-count");
   upgradeCount.textContent =
     state.game.upgrades > 1 ? `${state.game.upgrades}x` : "";
+
+  // Update Map
+  const leftPercent = state.game.player.x / 9600 * 100
+  const topPercent = state.game.player.y / 9600 * 100
+  playerLocator.style.top = topPercent + "%"
+  playerLocator.style.left = leftPercent + "%"
+  playerLocator.style.transform = `translate(-${50}%, -${50}%) rotate(${state.game.player.rotation + Math.PI / 2}rad)`
 }
 
 function updateUpgrades(title) {
