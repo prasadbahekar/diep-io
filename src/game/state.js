@@ -6,11 +6,8 @@ export const state = {
   },
   game: {
     worldSize: 9600,
+    onMobile: window.matchMedia("(pointer: coarse)").matches,
     started: false,
-    // level: 1,
-    baseHealth: 0,
-    health: 0,
-    maxHealth: 0,
     packetNow: 0,
     player: {
       name: "PiGuy141",

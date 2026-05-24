@@ -8,7 +8,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.audio("start", "/assets/sounds/ui/start-game.mp3");
+    this.load.audio("start", `${import.meta.env.BASE_URL}assets/sounds/ui/start-game.mp3`);
   }
 
   create() {

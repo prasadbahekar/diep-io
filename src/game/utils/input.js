@@ -1,8 +1,6 @@
 export const input = {
-  up: false,
-  down: false,
-  left: false,
-  right: false,
+  moveX: 0, 
+  moveY: 0,
   shoot: false,
   isAutoRotate: false,
   isMouseDown: false,

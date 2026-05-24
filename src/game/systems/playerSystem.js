@@ -57,14 +57,8 @@ function playerMovement(player, delta) {
   const accel = 6;
   const friction = 0.95;
 
-  let inputX = 0;
-  let inputY = 0;
-
-  // Input
-  if (input.left) inputX -= 1;
-  if (input.right) inputX += 1;
-  if (input.up) inputY -= 1;
-  if (input.down) inputY += 1;
+  let inputX = input.moveX;
+  let inputY = input.moveY;
 
   // Normalize Input
   const length = Math.sqrt(inputX * inputX + inputY * inputY);

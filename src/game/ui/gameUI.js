@@ -99,6 +99,7 @@ export function createGameUI() {
   const nameField = document.getElementById("playerNameInput");
   const nameElement = document.getElementById("playerName");
   nameElement.textContent = nameField.value;
+  detectControlsMode();
 }
 
 export function updateGameUI() {
@@ -228,7 +229,98 @@ function updateProgressBar() {
   levelProgEl.style.width = `${currentWidth}%`;
 }
 
-document.addEventListener("mousemove", (e) => {
+//
+// SETUP CONTROLS
+//
+
+function detectControlsMode() {
+  if (state.game.onMobile) {
+    const map = document.getElementById("map");
+    map.style.display = "none";
+  } else {
+    const moveJoystick = document.getElementById("left-joystick");
+    const fireJoystick = document.getElementById("right-joystick");
+    moveJoystick.style.display = "none";
+    fireJoystick.style.display = "none";
+  }
+}
+
+//
+// MOBILE CONTROLS
+//
+
+const controls = {
+  move: { x: 0, y: 0 },
+  fire: { x: 0, y: 0 }
+};
+
+export function setMobileControls() {
+  createJoystick({
+    outer: document.getElementById("left-joystick"),
+    inner: document.getElementById("left-inner"),
+    output: controls.move
+  });
+
+  createJoystick({
+    outer: document.getElementById("right-joystick"),
+    inner: document.getElementById("right-inner"),
+    output: controls.fire
+  });
+}
+
+export function getMobileControls() {
+  return controls;
+}
+
+function createJoystick({ outer, inner, output }) {
+  if (!outer || !inner) return;
+  let dragging = false;
+
+  outer.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    updateJoystick(e);
+  });
+
+  window.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    updateJoystick(e);
+  });
+
+  window.addEventListener("pointerup", () => {
+    dragging = false;
+    inner.style.transform = `translate(-50%, -50%)`;
+    output.x = 0;
+    output.y = 0;
+  });
+
+  function updateJoystick(e) {
+    const rect = outer.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    let dx = e.clientX - centerX;
+    let dy = e.clientY - centerY;
+
+    const maxRadius = rect.width / 2;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance > maxRadius) {
+      dx = (dx / distance) * maxRadius;
+      dy = (dy / distance) * maxRadius;
+    }
+
+    inner.style.transform =
+      `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
+    output.x = dx / maxRadius;
+    output.y = dy / maxRadius;
+  }
+}
+
+
+//
+// DESKTOP CONTROLS
+//
+
+document.addEventListener("pointermove", (e) => {
   showPanel = e.clientX < 224 && e.clientY > window.innerHeight - 224;
 });
 

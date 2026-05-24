@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import Player from "../entities/player";
-import { createGameUI, updateGameUI } from "../ui/gameUI";
+import { createGameUI, getMobileControls, setMobileControls, updateGameUI } from "../ui/gameUI";
 import { state } from "../state";
 import { getLevelFromScore } from "../data/levels";
 import { regenHP } from "../data/upgrades";
@@ -44,11 +44,11 @@ export default class GameScene extends Phaser.Scene {
     });
     
     window.addEventListener("mousedown", () => {
-      this.isMouseDown = true;
+      if (!state.game.onMobile) this.isMouseDown = true;
     });
 
     window.addEventListener("mouseup", () => {
-      this.isMouseDown = false;
+      if (!state.game.onMobile) this.isMouseDown = false;
     });
 
     window.addEventListener("keydown", (e) => {
@@ -77,7 +77,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.grid.setDepth(-1);
     this.player.setDepth(4);
-
+    if (state.game.onMobile) setMobileControls();
     createGameUI();
   }
 
@@ -89,7 +89,6 @@ export default class GameScene extends Phaser.Scene {
     this.updateBullets();
     this.updatePolygons(delta);
     updateGameUI();
-
 
     state.game.player.prevX = state.game.player.x;
     state.game.player.prevY = state.game.player.y;
@@ -126,19 +125,23 @@ export default class GameScene extends Phaser.Scene {
   }
  
   updateInput() {
-    input.up = this.cursors.up.isDown || this.keys.up.isDown;
-    input.down = this.cursors.down.isDown || this.keys.down.isDown;
-    input.left = this.cursors.left.isDown || this.keys.left.isDown;
-    input.right = this.cursors.right.isDown || this.keys.right.isDown;
+    if (state.game.onMobile) {
+      const controls = getMobileControls();
+      input.moveX = controls.move.x;
+      input.moveY = controls.move.y;
+      input.mouseX = this.player.x + controls.fire.x * 100;
+      input.mouseY = this.player.y + controls.fire.y * 100;
+      input.shoot = Math.abs(controls.fire.x) > 0.1 || Math.abs(controls.fire.y) > 0.1;
+    } else {
+      input.moveX = (this.cursors.right.isDown || this.keys.right.isDown ? 1 : 0) - (this.cursors.left.isDown || this.keys.left.isDown ? 1 : 0);
+      input.moveY = (this.cursors.down.isDown || this.keys.down.isDown ? 1 : 0) - (this.cursors.up.isDown || this.keys.up.isDown ? 1 : 0);
+      const worldPoint = this.cameras.main.getWorldPoint(this.mouseX, this.mouseY);
+      input.mouseX = worldPoint.x;
+      input.mouseY = worldPoint.y;
+      input.shoot = this.isMouseDown;
+      input.isAutoRotate = this.isAutoRotate;
+    }
 
-    const worldPoint = this.cameras.main.getWorldPoint(
-      this.mouseX,
-      this.mouseY,
-    );
-    input.mouseX = worldPoint.x;
-    input.mouseY = worldPoint.y;
-    input.shoot = this.isMouseDown;
-    input.isAutoRotate = this.isAutoRotate;
   }
 
   updateBullets() {
