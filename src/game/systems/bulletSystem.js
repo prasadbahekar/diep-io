@@ -48,6 +48,15 @@ function checkBulletCollisions(bulletId) {
         world.polygons.get(element.id).hp -= damage;
         world.polygons.get(element.id).lastHitBy = bullet.parent;
         world.bullets.get(bulletId).force -= damage;
+
+        // Knockback
+        const knockbackStrength = damage;
+        const knockbackX = (dx / distance) * knockbackStrength * Math.abs(bullet.velX) ;
+        const knockbackY = (dy / distance) * knockbackStrength * Math.abs(bullet.velY);
+        console.log(world.polygons.get(element.id).velX + ", , , " + knockbackX);
+        world.polygons.get(element.id).velX += knockbackX;
+        world.polygons.get(element.id).velY += knockbackY;
+        console.log(world.polygons.get(element.id).velX);
       }
     }
   }
