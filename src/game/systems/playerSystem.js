@@ -162,6 +162,7 @@ function playerCollisions(player, delta) {
 function updateUpgrades(player, delta) {
   if (player.upgrades <= 0) return;
 
+  const input = inputs[player.id];
   const upgradeIndexMap = {
     "Health Regen": 0,
     "Max Health": 1,
