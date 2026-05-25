@@ -1,4 +1,6 @@
 import { ACHIEVEMENTS } from "../data/advancements.js";
+import { state } from "../state.js";
+import { getGamepadControls } from "../utils/functions.js";
 
 let scrollOffset = -16;
 let smoothOffset = 8;
@@ -97,10 +99,30 @@ function updateScrollOffset(value) {
   }
 }
 
+function detectGamepadInput () {
+  if (!state.game.onGamepad) return;
+  const gamepad = getGamepadControls();
+  if (gamepad.buttons[0].pressed) {
+    const button = document.getElementById("startBtn");
+    if (!state.game.started) button.click();
+  }
+}
+
+// --- Gamepad Detection ---
+window.addEventListener("gamepadconnected", (e) => {
+  console.log("damn you've a controller?");
+  state.game.onGamepad = true;
+});
+
+window.addEventListener("gamepaddisconnected", () => {
+  state.game.onGamepad = false;
+})
+
 // --- Game loop ---
 function startLoop() {
   function loop() {
     updateCarousel();
+    detectGamepadInput();
     requestAnimationFrame(loop);
   }
   loop();

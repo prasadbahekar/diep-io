@@ -21,6 +21,7 @@ export default class MenuScene extends Phaser.Scene {
     button.onclick = async () => {
       try {
         // button.disableInteractive();
+        state.game.started = true;
         this.sound.play("start");
         await new Promise((resolve) => setTimeout(resolve, 100));
         buttonText.innerText = "Loading...";

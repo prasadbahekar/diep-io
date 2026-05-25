@@ -7,6 +7,7 @@ export const state = {
   game: {
     worldSize: 9600,
     onMobile: window.matchMedia("(pointer: coarse)").matches,
+    onGamepad: false,
     started: false,
     packetNow: 0,
     player: {

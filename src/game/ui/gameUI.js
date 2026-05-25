@@ -245,6 +245,21 @@ function detectControlsMode() {
   }
 }
 
+// 
+// GAMEPAD CONTROLS
+// 
+
+window.addEventListener("gamepadconnected", (e) => {
+  console.log("damn you've a controller?");
+  console.log(e.gamepad);
+  state.game.onGamepad = true;
+  // requestAnimationFrame(update);
+});
+
+window.addEventListener("gamepaddisconnected", () => {
+  state.game.onGamepad = false;
+})
+
 //
 // MOBILE CONTROLS
 //

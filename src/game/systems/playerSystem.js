@@ -82,7 +82,6 @@ function playerMovement(player, delta) {
   // Cap
   player.velX = Phaser.Math.Clamp(player.velX, -player.maxVel, player.maxVel);
   player.velY = Phaser.Math.Clamp(player.velY, -player.maxVel, player.maxVel);
-  console.log(player.velX)
 
   if (Math.abs(player.velX) < 0.01) player.velX = 0;
   if (Math.abs(player.velY) < 0.01) player.velY = 0;

@@ -9,6 +9,7 @@ import Polygon from "../entities/polygon";
 import { updateServer, joinPlayer } from "../server/server";
 import Bullet from "../entities/bullet";
 import { packet } from "../server/packet";
+import { getGamepadControls } from "../utils/functions";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -16,6 +17,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    state.game.started = true;
     this.cellSize = 24;
     this.worldSize = 400 * this.cellSize;
 
@@ -27,6 +29,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.renderedBullets = new Map();
     this.renderedPolygons = new Map();
+
+    this.prevDpadDown = false;
+    this.gamepadAutoR = false;
+    this.gamepadX = 100;
+    this.gamepadY = 0;
 
     // Controls
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -125,7 +132,20 @@ export default class GameScene extends Phaser.Scene {
   }
  
   updateInput() {
-    if (state.game.onMobile) {
+    if (state.game.onGamepad) {
+      const gamepad = getGamepadControls();
+      input.moveX = Math.abs(gamepad.axes[0]) < 0.001 ? 0 : gamepad.axes[0];
+      input.moveY = Math.abs(gamepad.axes[1]) < 0.001 ? 0 : gamepad.axes[1];
+      this.gamepadX = Math.abs(gamepad.axes[2]) < 0.1 ? this.gamepadX : gamepad.axes[2] * 100;
+      this.gamepadY = Math.abs(gamepad.axes[3]) < 0.1 ? this.gamepadY : gamepad.axes[3] * 100;
+      input.mouseX = this.player.x + this.gamepadX;
+      input.mouseY = this.player.y + this.gamepadY;
+      input.shoot = gamepad.buttons[6].pressed || gamepad.buttons[7].pressed;
+      const dpadDownPressed = gamepad.buttons[13].pressed;
+      if (dpadDownPressed && !this.prevDpadDown) this.gamepadAutoR = !this.gamepadAutoR;
+      this.prevDpadDown = dpadDownPressed;
+      input.isAutoRotate = this.gamepadAutoR;
+    } else if (state.game.onMobile) {
       const controls = getMobileControls();
       input.moveX = controls.move.x;
       input.moveY = controls.move.y;
