@@ -1,10 +1,17 @@
-export const input = {
-  moveX: 0, 
-  moveY: 0, 
-  shoot: false,
-  isAutoRotate: false,
-  isMouseDown: false,
-  mouseX: 0,
-  mouseY: 0,
-  upgrade: null,
-};
+export class Input {
+  constructor() {
+    this.moveX = 0;
+    this.moveY = 0;
+
+    this.shoot = false;
+    this.isAutoRotate = false;
+    this.isMouseDown = false;
+
+    this.mouseX = 0;
+    this.mouseY = 0;
+
+    this.upgrade = null;
+  }
+}
+
+export const inputs = {}

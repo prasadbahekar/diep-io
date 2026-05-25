@@ -2,7 +2,6 @@ import { COLORS } from "../data/colors";
 import { getLevelData, getPointsToNextLevel } from "../data/levels";
 import { state } from "../state";
 import Phaser from "phaser";
-import { input } from "../utils/input";
 
 const upgradesContainer = document.getElementById("upgrades");
 let showPanel = false;
@@ -90,7 +89,7 @@ export function createGameUI() {
     const add = elem.querySelector(".add");
     add.addEventListener("click", () => {
       if (state.game.player.upgrades > 0) { 
-        input.upgrade = elem.dataset.upgrade;
+        state.inputMap.upgrade = elem.dataset.upgrade;
       }
     });
   }
@@ -353,5 +352,5 @@ document.addEventListener("keydown", (e) => {
   if (key < 1 || key > 8) return;
   if (state.game.player.upgrades <= 0) return;
   const upgrade = upgradeElements[key - 1];
-  if (upgrade) input.upgrade = upgrade.dataset.upgrade;
+  if (upgrade) state.inputMap.upgrade = upgrade.dataset.upgrade;
 });

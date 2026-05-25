@@ -4,9 +4,8 @@ import { createGameUI, getMobileControls, setMobileControls, updateGameUI } from
 import { state } from "../state";
 import { getLevelFromScore } from "../data/levels";
 import { regenHP } from "../data/upgrades";
-import { input } from "../utils/input";
 import Polygon from "../entities/polygon";
-import { updateServer, joinPlayer } from "../server/server";
+import { updateServer, joinPlayer, updateServerInput } from "../server/server";
 import Bullet from "../entities/bullet";
 import { packet } from "../server/packet";
 import { getGamepadControls } from "../utils/functions";
@@ -90,6 +89,7 @@ export default class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     this.updateInput();
+    updateServerInput(state.inputMap, state.game.player.id);
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);
@@ -99,7 +99,7 @@ export default class GameScene extends Phaser.Scene {
 
     state.game.player.prevX = state.game.player.x;
     state.game.player.prevY = state.game.player.y;
-    input.upgrade = null;
+    state.inputMap.upgrade = null;
 
     this.grid.x = Phaser.Math.Clamp(
       Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize - this.cellSize * 12,
@@ -134,32 +134,32 @@ export default class GameScene extends Phaser.Scene {
   updateInput() {
     if (state.game.onGamepad) {
       const gamepad = getGamepadControls();
-      input.moveX = Math.abs(gamepad.axes[0]) < 0.001 ? 0 : gamepad.axes[0];
-      input.moveY = Math.abs(gamepad.axes[1]) < 0.001 ? 0 : gamepad.axes[1];
+      state.inputMap.moveX = Math.abs(gamepad.axes[0]) < 0.001 ? 0 : gamepad.axes[0];
+      state.inputMap.moveY = Math.abs(gamepad.axes[1]) < 0.001 ? 0 : gamepad.axes[1];
       this.gamepadX = Math.abs(gamepad.axes[2]) < 0.1 ? this.gamepadX : gamepad.axes[2] * 100;
       this.gamepadY = Math.abs(gamepad.axes[3]) < 0.1 ? this.gamepadY : gamepad.axes[3] * 100;
-      input.mouseX = this.player.x + this.gamepadX;
-      input.mouseY = this.player.y + this.gamepadY;
-      input.shoot = gamepad.buttons[6].pressed || gamepad.buttons[7].pressed;
+      state.inputMap.mouseX = this.player.x + this.gamepadX;
+      state.inputMap.mouseY = this.player.y + this.gamepadY;
+      state.inputMap.shoot = gamepad.buttons[6].pressed || gamepad.buttons[7].pressed;
       const dpadDownPressed = gamepad.buttons[13].pressed;
       if (dpadDownPressed && !this.prevDpadDown) this.gamepadAutoR = !this.gamepadAutoR;
       this.prevDpadDown = dpadDownPressed;
-      input.isAutoRotate = this.gamepadAutoR;
+      state.inputMap.isAutoRotate = this.gamepadAutoR;
     } else if (state.game.onMobile) {
       const controls = getMobileControls();
-      input.moveX = controls.move.x;
-      input.moveY = controls.move.y;
-      input.mouseX = this.player.x + controls.fire.x * 100;
-      input.mouseY = this.player.y + controls.fire.y * 100;
-      input.shoot = Math.abs(controls.fire.x) > 0.1 || Math.abs(controls.fire.y) > 0.1;
+      state.inputMap.moveX = controls.move.x;
+      state.inputMap.moveY = controls.move.y;
+      state.inputMap.mouseX = this.player.x + controls.fire.x * 100;
+      state.inputMap.mouseY = this.player.y + controls.fire.y * 100;
+      state.inputMap.shoot = Math.abs(controls.fire.x) > 0.1 || Math.abs(controls.fire.y) > 0.1;
     } else {
-      input.moveX = (this.cursors.right.isDown || this.keys.right.isDown ? 1 : 0) - (this.cursors.left.isDown || this.keys.left.isDown ? 1 : 0);
-      input.moveY = (this.cursors.down.isDown || this.keys.down.isDown ? 1 : 0) - (this.cursors.up.isDown || this.keys.up.isDown ? 1 : 0);
+      state.inputMap.moveX = (this.cursors.right.isDown || this.keys.right.isDown ? 1 : 0) - (this.cursors.left.isDown || this.keys.left.isDown ? 1 : 0);
+      state.inputMap.moveY = (this.cursors.down.isDown || this.keys.down.isDown ? 1 : 0) - (this.cursors.up.isDown || this.keys.up.isDown ? 1 : 0);
       const worldPoint = this.cameras.main.getWorldPoint(this.mouseX, this.mouseY);
-      input.mouseX = worldPoint.x;
-      input.mouseY = worldPoint.y;
-      input.shoot = this.isMouseDown;
-      input.isAutoRotate = this.isAutoRotate;
+      state.inputMap.mouseX = worldPoint.x;
+      state.inputMap.mouseY = worldPoint.y;
+      state.inputMap.shoot = this.isMouseDown;
+      state.inputMap.isAutoRotate = this.isAutoRotate;
     }
 
   }

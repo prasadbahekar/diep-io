@@ -1,3 +1,5 @@
+import { Input } from "./utils/input";
+
 export const state = {
   isLoggedIn: false,
   player: {
@@ -38,4 +40,5 @@ export const state = {
     polygons: [],
     bullets: [],
   },
+  inputMap: new Input(),
 };

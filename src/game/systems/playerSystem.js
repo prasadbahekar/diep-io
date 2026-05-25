@@ -1,9 +1,9 @@
 import { getLevelFromScore } from "../data/levels";
 import { regenHP } from "../data/upgrades";
 import { world } from "../server/world";
-import { input } from "../utils/input";
 import Phaser, { Time } from "phaser";
 import { chunkKeyWorld } from "./chunkSystem";
+import { inputs } from "../utils/input";``
 
 export function initializePlayer(renderDistance) {
   const player = {
@@ -45,6 +45,7 @@ export function updatePlayers(delta) {
 }
 
 function playerRotation(player, delta) {
+  const input = inputs[player.id];
   if (input.isAutoRotate) {
     player.rotation += 1 * delta / 1000;
   } else {
@@ -59,6 +60,7 @@ function playerRotation(player, delta) {
 
 
 function playerMovement(player, delta) {
+  const input = inputs[player.id];
   const accel = 6;
   const friction = 0.95;
 
@@ -189,6 +191,7 @@ function updateUpgrades(player, delta) {
 
 function playerShoot(player) {
   const now = Date.now();
+  const input = inputs[player.id];
   if (input.shoot && now - player.lastShoot >= player.reload * 1000) {
     player.isShooting = true;
     player.lastShoot = now;

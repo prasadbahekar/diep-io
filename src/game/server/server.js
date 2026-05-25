@@ -5,6 +5,7 @@ import { chunkKey, chunkKeyWorld, initializeChunks, updateChunks } from "../syst
 import { packet } from "./packet";
 import { world } from "./world";
 import { getRandomInt } from "../utils/functions";
+import { inputs } from "../utils/input";
 
 export function joinPlayer(renderDistance) {
   const types = ["square", "square", "triangle", "triangle", "pentagon"];
@@ -18,6 +19,11 @@ export function updateServer(delta) {
   updateBullets(delta);
   updatePlayers(delta);
   createPacket();
+}
+
+export function updateServerInput(input, playerId) {
+  inputs[playerId] = input;
+  console.log(inputs);
 }
 
 function createPacket() {
