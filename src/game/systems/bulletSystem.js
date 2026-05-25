@@ -6,14 +6,13 @@ export function updateBullets(delta) {
     bullet.x += bullet.velX * (delta / 100);
     bullet.y += bullet.velY * (delta / 100);
     bullet.lifespan -= (delta / 1000) * 25;
-    checkBulletCollisions(bullet.id);
-
     if (bullet.x < 0 || bullet.x > 9600 || bullet.y < 0 || bullet.y > 9600) {
       world.bullets.delete(bullet.id);
       return;
     }
 
-    if (bullet.lifespan <= 0 || bullet.force <= 0) {
+    checkBulletCollisions(bullet.id);
+    if (bullet.lifespan <= 0 || bullet.force <= 0 || bullet.hp <= 0) {
       world.bullets.delete(bullet.id);
     } else {
       world.chunks.get(chunkKeyWorld(bullet.x, bullet.y)).add(
@@ -33,10 +32,6 @@ export function updateBullets(delta) {
 function checkBulletCollisions(bulletId) {
   const bullet = world.bullets.get(bulletId);
   const chunk = world.chunks.get(chunkKeyWorld(bullet.x, bullet.y));
-  if (bullet.x < 0 || bullet.x > 9600 || bullet.y < 0 || bullet.y > 9600) {
-    world.bullets.delete(bulletId);
-    return;
-  }
   for (const element of chunk) {
     if (element.elType == "polygon") {
       const dx = element.x - bullet.x;
@@ -44,16 +39,19 @@ function checkBulletCollisions(bulletId) {
       const distance = Math.sqrt(dx * dx + dy * dy);
       const threshold = element.type === "square" ? 20 : element.type === "triangle" ? 22 : 30;
       if (distance < threshold) {
-        const damage = (bullet.force > element.hp) ? element.hp : bullet.force; 
+        const damage = (bullet.force > element.hp) ? element.hp : bullet.force * 0.5;
         world.polygons.get(element.id).hp -= damage;
         world.polygons.get(element.id).lastHitBy = bullet.parent;
         world.bullets.get(bulletId).force -= damage;
 
-        const knockbackStrength = damage * 0.25;
-        const knockbackX = knockbackStrength * bullet.velX ;
+        const knockbackStrength = damage * 0.15;
+        const knockbackX = knockbackStrength * bullet.velX;
         const knockbackY = knockbackStrength * bullet.velY;
         world.polygons.get(element.id).velX += knockbackX;
         world.polygons.get(element.id).velY += knockbackY;
+
+        const backDamage = element.type === "square" ? 2 : element.type === "triangle" ? 4 : 6;
+        bullet.hp -= backDamage * 0.2;
       }
     }
   }

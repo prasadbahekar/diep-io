@@ -1,7 +1,9 @@
 import { getLevelFromScore } from "../data/levels";
+import { regenHP } from "../data/upgrades";
 import { world } from "../server/world";
 import { input } from "../utils/input";
 import Phaser, { Time } from "phaser";
+import { chunkKeyWorld } from "./chunkSystem";
 
 export function initializePlayer(renderDistance) {
   const player = {
@@ -11,15 +13,16 @@ export function initializePlayer(renderDistance) {
     velX: 0,
     velY: 0,
     maxVel: 180,
-    lastShoot: 0,
-    level: 1,
-    score: 0,
-    upgrades: 0,
-    hp: 50, 
     maxHp: 50,
-    reload: 0.6,
-    damage: 7,
+    hp: 50, 
+    lastShoot: 0,
+    score: 0,
+    level: 1,
+    upgrades: 0,
     upLvl: "00000000",
+    damage: 7,
+    reload: 0.6,
+    bulletSpeed: 20,
     renderDistance: renderDistance,
     id: crypto.randomUUID(),
   };
@@ -35,8 +38,9 @@ export function updatePlayers(delta) {
     playerMovement(player, delta);
     playerRotation(player, delta);
     playerShoot(player);
-    playerMetrics(player);
-    updateUpgrades(player);
+    playerCollisions(player, delta);
+    playerMetrics(player, delta);
+    updateUpgrades(player, delta);
   });
 }
 
@@ -52,6 +56,7 @@ function playerRotation(player, delta) {
     );
   }
 }
+
 
 function playerMovement(player, delta) {
   const accel = 6;
@@ -77,6 +82,7 @@ function playerMovement(player, delta) {
   // Cap
   player.velX = Phaser.Math.Clamp(player.velX, -player.maxVel, player.maxVel);
   player.velY = Phaser.Math.Clamp(player.velY, -player.maxVel, player.maxVel);
+  console.log(player.velX)
 
   if (Math.abs(player.velX) < 0.01) player.velX = 0;
   if (Math.abs(player.velY) < 0.01) player.velY = 0;
@@ -88,19 +94,17 @@ function playerMovement(player, delta) {
   player.y = Phaser.Math.Clamp(player.y, 0, world.properties.worldSize);
 }
 
-function playerMetrics(player, updateStats = false) {
+function playerMetrics(player, delta, updateStats = false) {
+  // Health Regen
+  player.hp += regenHP[parseInt(player.upLvl[0] || "0")] * player.maxHp * (delta / 1000);
+  if (player.hp > player.maxHp) player.hp = player.maxHp;
+
   if (getLevelFromScore(player.score) > player.level) {
     player.upgrades += getLevelFromScore(player.score) - player.level;
     player.level = getLevelFromScore(player.score);
-    // Max Health
-    const hpRatio = player.hp / player.maxHp;
-    const maxHealthLvl = parseInt(player.upLvl[1] || "0");
-    const baseHealth = 50 + (2 * (player.level - 1))
-    const bonusHealth = maxHealthLvl * 20;
-    player.maxHp = baseHealth + bonusHealth;
-    player.hp = hpRatio * player.maxHp;
   }
-  if (updateStats) {
+
+  if (updateStats || getLevelFromScore(player.score) > player.level) {
     // Max Health
     const hpRatio = player.hp / player.maxHp;
     const maxHealthLvl = parseInt(player.upLvl[1] || "0");
@@ -109,6 +113,16 @@ function playerMetrics(player, updateStats = false) {
     player.maxHp = baseHealth + bonusHealth;
     player.hp = hpRatio * player.maxHp;
 
+    // Movement Speed
+    const moveSpeedLvl = parseInt(player.upLvl[7] || "0");
+    player.maxVel = 175 + (moveSpeedLvl * 18) - (player.level * 3);
+
+    // Bullet Speed
+    const bulletSpeedLvl = parseInt(player.upLvl[2] || "0");
+    player.bulletSpeed = 20 + (bulletSpeedLvl * 2);
+  } 
+
+  if (updateStats) {
     // Bullet Damage
     const bulletDmgLvl = parseInt(player.upLvl[5] || "0");
     player.damage = 7 + (bulletDmgLvl * 3);
@@ -119,7 +133,32 @@ function playerMetrics(player, updateStats = false) {
   }
 }
 
-function updateUpgrades(player) {
+function playerCollisions(player, delta) {
+  const chunk = world.chunks.get(chunkKeyWorld(player.x, player.y));
+  for (const element of chunk) {
+    if (element.elType == "polygon") {
+      const dx = element.x - player.x;
+      const dy = element.y - player.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const threshold = element.type === "square" ? 50 : element.type === "triangle" ? 50 : 75;
+      if (distance < threshold +5) {
+        player.velX -= dx * 0.25;
+        player.velY -= dy * 0.25;
+      }
+      if (distance < threshold) {
+        const damage = (parseInt(player.upLvl[3] || "0") + 5) * 4 * (delta / 300);
+        world.polygons.get(element.id).hp -= damage;
+        world.polygons.get(element.id).lastHitBy = player.id;
+        const backDamage = element.type === "square" ? 8 : element.type === "triangle" ? 16 : 24;
+        player.hp -= backDamage * (delta / 300);
+        world.polygons.get(element.id).velX += dx * 0.15;
+        world.polygons.get(element.id).velY += dy * 0.15;
+      }
+    }
+  }
+}
+
+function updateUpgrades(player, delta) {
   if (player.upgrades <= 0) return;
 
   const upgradeIndexMap = {
@@ -146,7 +185,7 @@ function updateUpgrades(player) {
   levels[index] = currentLevel.toString();
   player.upLvl = levels.join("");
   player.upgrades -= 1;
-  playerMetrics(player, true);
+  playerMetrics(player, delta, true);
 }
 
 function playerShoot(player) {
@@ -156,8 +195,8 @@ function playerShoot(player) {
     player.lastShoot = now;
 
     const angle = player.rotation;
-    const velX = Math.cos(angle) * 20 + player.velX * 0.03;
-    const velY = Math.sin(angle) * 20 + player.velY * 0.03;
+    const velX = Math.cos(angle) * player.bulletSpeed + player.velX * 0.03;
+    const velY = Math.sin(angle) * player.bulletSpeed + player.velY * 0.03;
     const bulletX = player.x + Math.cos(angle) * 24;
     const bulletY = player.y + Math.sin(angle) * 24;
 
@@ -170,6 +209,7 @@ function playerShoot(player) {
       y: bulletY,
       velX: velX,
       velY: velY,
+      hp: 2 + (1.5 * parseInt(player.upLvl[4] || "0")),
       force: player.damage,
     });
 

@@ -8,15 +8,15 @@ import { getRandomInt } from "../utils/functions";
 
 export function joinPlayer(renderDistance) {
   const types = ["square", "square", "triangle", "triangle", "pentagon"];
-  for (let i = 0; i < 100; i++) createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), types[getRandomInt(0, types.length - 1)]);
+  for (let i = 0; i < 200; i++) createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), types[getRandomInt(0, types.length - 1)]);
   return initializePlayer(renderDistance);
 }
 
 export function updateServer(delta) {
   initializeChunks();
-  updatePlayers(delta);
   updatePolygons(delta);
   updateBullets(delta);
+  updatePlayers(delta);
   createPacket();
 }
 

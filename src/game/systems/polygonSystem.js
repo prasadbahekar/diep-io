@@ -26,8 +26,8 @@ export function updatePolygons(delta) {
       return;
     }
 
-    // polygon.velX = Math.max(-12, Math.min(12, polygon.velX));
-    // polygon.velY = Math.max(-12, Math.min(12, polygon.velY));
+    polygon.velX = Math.max(-80, Math.min(80, polygon.velX));
+    polygon.velY = Math.max(-80, Math.min(80, polygon.velY));
 
     if (polygon.hp <= 0) {
       if (polygon.lastHitBy) {
