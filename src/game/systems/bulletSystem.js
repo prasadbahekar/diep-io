@@ -49,9 +49,9 @@ function checkBulletCollisions(bulletId) {
         world.polygons.get(element.id).lastHitBy = bullet.parent;
         world.bullets.get(bulletId).force -= damage;
 
-        const knockbackStrength = damage;
-        const knockbackX = (dx / distance) * knockbackStrength * Math.abs(bullet.velX) ;
-        const knockbackY = (dy / distance) * knockbackStrength * Math.abs(bullet.velY);
+        const knockbackStrength = damage * 0.25;
+        const knockbackX = knockbackStrength * bullet.velX ;
+        const knockbackY = knockbackStrength * bullet.velY;
         world.polygons.get(element.id).velX += knockbackX;
         world.polygons.get(element.id).velY += knockbackY;
       }

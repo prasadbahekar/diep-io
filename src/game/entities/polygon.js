@@ -7,6 +7,7 @@ export default class Polygon extends Phaser.GameObjects.Container {
 
     this.id = id;
     this.type = type;
+    this.rotateSide = Math.random() < 0.5 ? -1 : 1;
 
     let bodyObj;
 
@@ -77,14 +78,13 @@ export default class Polygon extends Phaser.GameObjects.Container {
     this.healthBar.setAlpha(0.8);
     this.healthBar.setDepth(3);
     scene.add.existing(this);
-    this.rotation = rotation;
   }
 
-  update(x, y, rotation, hp, delta) {
+  update(x, y, hp, delta) {
     this.x = x;
     this.y = y;
-    this.rotation = rotation;
     this.hp = hp;
+    this.rotation += this.rotateSide * delta / 1000 * 0.2;
 
     this.healthBar.x = x;
     this.healthBar.y = y;

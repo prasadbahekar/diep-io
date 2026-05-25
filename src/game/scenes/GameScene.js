@@ -207,11 +207,11 @@ export default class GameScene extends Phaser.Scene {
       const polyObj = this.renderedPolygons.get(id);
 
       if (polyObj) {
-        polyObj.update(p.x, p.y, p.rotation, p.hp, delta);
+        polyObj.update(p.x, p.y, p.hp, delta);
       } else {
         this.renderedPolygons.set(
           id,
-          new Polygon(this, p.id, p.x, p.y, p.type, p.rotation)
+          new Polygon(this, p.id, p.x, p.y, p.type)
         );
       }
     }
