@@ -2,73 +2,32 @@ import Phaser from "phaser";
 import { getLevelData } from "../data/levels";
 import { state } from "../state";
 import Bullet from "./bullet";
-import { packet } from "../server/packet";
 
 export default class Player extends Phaser.GameObjects.Container {
   constructor(scene, x, y) {
     // Player Shapes
     const pBody = scene.add.circle(0, 0, 12, 0x15b5df);
     pBody.setStrokeStyle(1, 0x0f88a9);
-
     const weapon = scene.add.rectangle(12, 0, 24, 12, 0x9d9d9d);
     weapon.setStrokeStyle(1, 0x787878);
-
     const weapons = scene.add.container(0, 0, [weapon]);
     const healthBar = scene.add.graphics();
-
     super(scene, x, y, [weapons, pBody, healthBar]);
 
     this.scene = scene;
     this.weapon = weapon;
     this.weapons = weapons;
     this.healthBar = healthBar;
-    this.bullets = [];
-
-    // Variables
-    this.isShooting = false;
     this.weaponOriginalX = 12;
-
-    // Movement
-    this.autoRotate = false;
-
-    // Add to scene
     scene.add.existing(this);
     scene.physics.add.existing(this);
-
-    this.body.setDrag(100, 100);
-    this.body.setMaxVelocity(160, 160);
-
-    // Mouse
-    this.mouseX = 0;
-    this.mouseY = 0;
-    this.isMouseDown = false;
-
-    window.addEventListener("mousemove", (e) => {
-      this.mouseX = e.clientX;
-      this.mouseY = e.clientY;
-    });
-
-    window.addEventListener("mousedown", () => {
-      this.isMouseDown = true;
-    });
-
-    window.addEventListener("mouseup", () => {
-      this.isMouseDown = false;
-    });
-
-    // Toggle auto rotate
-    document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() === "c") {
-        this.autoRotate = !this.autoRotate;
-      }
-    });
   }
 
   update(delta) {
     this.x = state.game.player.x;
     this.y = state.game.player.y;
     this.updateRotation(delta);
-    this.updateDelta();
+    this.updateDelta(delta);
     this.shoot();
     this.renderUpdate();
   }
@@ -80,12 +39,9 @@ export default class Player extends Phaser.GameObjects.Container {
     this.weapons.rotation = Number.isFinite(value) ? value : this.weapons.rotation;
   }
 
-  updateDelta() {
-    this.now = Date.now();
-    this.elapsed = this.now - state.game.packetNow;
-    if (this.elapsed <= 0) this.elapsed = 1;
-    this.velX = (this.x - state.game.player.prevX) / (this.elapsed / 70);
-    this.velY = (this.y - state.game.player.prevY) / (this.elapsed / 70);
+  updateDelta(delta) {
+    this.velX = (this.x - state.game.player.prevX) / (delta / 1000);
+    this.velY = (this.y - state.game.player.prevY) / (delta / 1000);
   }
 
   shoot() {
@@ -110,12 +66,6 @@ export default class Player extends Phaser.GameObjects.Container {
       targetZoom,
       0.08,
     );
-
-    // Update bullets
-    for (const bullet of this.bullets) {
-      bullet.update();
-    }
-    this.bullets = this.bullets.filter((bullet) => !bullet.dead);
 
     // Render Health
     if (state.game.player.hp == state.game.player.maxHp) this.healthBar.clear();

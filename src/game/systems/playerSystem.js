@@ -41,7 +41,24 @@ export function updatePlayers(delta) {
     playerCollisions(player, delta);
     playerMetrics(player, delta);
     updateUpgrades(player, delta);
+    playerChunkUpdate(player);
   });
+}
+
+function playerChunkUpdate(player) {
+  world.chunks.get(chunkKeyWorld(player.x, player.y)).add(
+    {
+      elType: "player",
+      x: player.x,
+      y: player.y,
+      type: "basic",
+      hp: player.hp,
+      maxHp: player.maxHp,
+      rotation: player.rotation,
+      id: player.id,
+      level: player.level,
+    }
+  )
 }
 
 function playerRotation(player, delta) {

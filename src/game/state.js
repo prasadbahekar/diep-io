@@ -39,6 +39,7 @@ export const state = {
     },
     polygons: [],
     bullets: [],
+    enemies: [],
   },
   inputMap: new Input(),
 };

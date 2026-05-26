@@ -7,8 +7,10 @@ import { regenHP } from "../data/upgrades";
 import Polygon from "../entities/polygon";
 import { updateServer, joinPlayer, updateServerInput } from "../server/server";
 import Bullet from "../entities/bullet";
-import { packet } from "../server/packet";
+import { packets } from "../server/packet";
 import { getGamepadControls } from "../utils/functions";
+import { Input } from "../utils/input";
+import Enemy from "../entities/enemies";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -23,11 +25,13 @@ export default class GameScene extends Phaser.Scene {
     // Initialize Render Distance
     const renderDistance = Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
     state.game.player.id = joinPlayer(renderDistance);
+    this.botId = joinPlayer(renderDistance)
     this.prevLvl = 1;
     this.isAutoRotate = false;
 
     this.renderedBullets = new Map();
     this.renderedPolygons = new Map();
+    this.renderedEnemies = new Map();
 
     this.prevDpadDown = false;
     this.gamepadAutoR = false;
@@ -90,11 +94,13 @@ export default class GameScene extends Phaser.Scene {
   update(time, delta) {
     this.updateInput();
     updateServerInput(state.inputMap, state.game.player.id);
+    updateServerInput(new Input, this.botId);
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);
     this.updateBullets();
     this.updatePolygons(delta);
+    this.updateEnemies(delta);
     updateGameUI();
 
     state.game.player.prevX = state.game.player.x;
@@ -115,6 +121,7 @@ export default class GameScene extends Phaser.Scene {
 }
 
   updateLocalTruth() {
+    const packet = packets[state.game.player.id];
     state.game.player.x = packet.player.x;
     state.game.player.y = packet.player.y;
     state.game.player.rotation = packet.player.rotation;
@@ -128,6 +135,7 @@ export default class GameScene extends Phaser.Scene {
 
     state.game.bullets = packet.bullets;
     state.game.polygons = packet.polygons;
+    state.game.enemies = packet.enemies;
     state.game.packetNow = packet.player.now;
   }
  
@@ -237,35 +245,34 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  // updateGameMetrics(delta) {
-  //   // Level
-  //   state.game.level = getLevelFromScore(state.game.score);
-  //   if (this.prevLvl !== state.game.level) {
-  //     state.game.upgrades += 1;
-  //     this.prevLvl = state.game.level;
-  //   }
+  updateEnemies(delta) {
+    console.log(this.renderedEnemies)
+    const enemies = state.game.enemies;
+    const serverIds = new Set();
+    const serverMap = new Map();
 
-  //   // Health
-  //   state.game.baseHealth = 50 + 2 * (state.game.level - 1);
-  //   state.game.maxHealth =
-  //     state.game.baseHealth + state.game.stats.maxHealth * 20;
+    for (const e of enemies) {
+      serverIds.add(e.id);
+      serverMap.set(e.id, e);
+    }
 
-  //   if (isNaN(this.prevMaxHealth)) this.prevMaxHealth = state.game.maxHealth;
+    for (const [id, enemyObj] of this.renderedEnemies) {
+      if (!serverIds.has(id)) {
+        if (enemyObj.destroy) enemyObj.destroy();
+        this.renderedEnemies.delete(id);
+      }
+    }
 
-  //   if (state.game.maxHealth != this.prevMaxHealth) {
-  //     state.game.health =
-  //       (state.game.health / this.prevMaxHealth) * state.game.maxHealth;
-  //   }
-
-  //   this.prevMaxHealth = state.game.maxHealth;
-
-  //   state.game.health +=
-  //     state.game.maxHealth *
-  //     regenHP[state.game.stats.regen].percent *
-  //     (delta / 1000);
-
-  //   if (state.game.health > state.game.maxHealth) {
-  //     state.game.health = state.game.maxHealth;
-  //   }
-  // }
+    for (const [id, e] of serverMap) {
+      const enemyObj = this.renderedEnemies.get(id);
+      if (enemyObj) {
+        enemyObj.update(e.x, e.y, e.rotation, null, e.level);
+      } else {
+        this.renderedEnemies.set(
+          id,
+          new Enemy(this, e.x, e.y, e.rotation, e.type, e.level)
+        );
+      }
+    }
+  }
 }

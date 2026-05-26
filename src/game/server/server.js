@@ -2,14 +2,14 @@ import { updateBullets } from "../systems/bulletSystem";
 import { updatePlayers, initializePlayer } from "../systems/playerSystem";
 import { createPolygon, updatePolygons } from "../systems/polygonSystem";
 import { chunkKey, chunkKeyWorld, initializeChunks, updateChunks } from "../systems/chunkSystem";
-import { packet } from "./packet";
+import { Packet, packets } from "./packet";
 import { world } from "./world";
 import { getRandomInt } from "../utils/functions";
 import { inputs } from "../utils/input";
 
 export function joinPlayer(renderDistance) {
   const types = ["square", "square", "triangle", "triangle", "pentagon"];
-  for (let i = 0; i < 200; i++) createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), types[getRandomInt(0, types.length - 1)]);
+  for (let i = 0; i < 50; i++) createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), types[getRandomInt(0, types.length - 1)]);
   return initializePlayer(renderDistance);
 }
 
@@ -23,13 +23,11 @@ export function updateServer(delta) {
 
 export function updateServerInput(input, playerId) {
   inputs[playerId] = input;
-  console.log(inputs);
 }
 
 function createPacket() {
   world.players.forEach((player) => {
-    packet.bullets = [];
-    packet.polygons = [];
+    const packet = new Packet();
     packet.player = {
       x: player.x,
       y: player.y,
@@ -62,8 +60,14 @@ function createPacket() {
           if (element.elType === "polygon") {
             packet.polygons.push(element);
           }
+
+          if (element.elType === "player") {
+            if (element.id != player.id) packet.enemies.push(element);
+          }
         }
       }
     }
+
+    packets[player.id] = packet;
   });
 }
