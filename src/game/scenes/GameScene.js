@@ -94,7 +94,7 @@ export default class GameScene extends Phaser.Scene {
   update(time, delta) {
     this.updateInput();
     updateServerInput(state.inputMap, state.game.player.id);
-    updateServerInput(new Input, this.botId);
+    updateServerInput(new Input(), this.botId);
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);
@@ -246,7 +246,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateEnemies(delta) {
-    console.log(this.renderedEnemies)
     const enemies = state.game.enemies;
     const serverIds = new Set();
     const serverMap = new Map();
@@ -266,7 +265,7 @@ export default class GameScene extends Phaser.Scene {
     for (const [id, e] of serverMap) {
       const enemyObj = this.renderedEnemies.get(id);
       if (enemyObj) {
-        enemyObj.update(e.x, e.y, e.rotation, null, e.level);
+        enemyObj.update(e, delta);
       } else {
         this.renderedEnemies.set(
           id,

@@ -54,5 +54,23 @@ function checkBulletCollisions(bulletId) {
         bullet.hp -= backDamage * 0.2;
       }
     }
+    if (element.elType == "player" && element.id !== bullet.parent) {
+      const dx = element.x - bullet.x;
+      const dy = element.y - bullet.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < 40) {
+        const damage = (bullet.force > element.hp) ? element.hp : bullet.force;
+        world.players.get(element.id).hp -= damage;
+        world.players.get(element.id).lastHitBy = bullet.parent;
+        world.bullets.get(bulletId).force -= damage;
+
+        const knockbackStrength = damage * 0.15;
+        const knockbackX = knockbackStrength * bullet.velX;
+        const knockbackY = knockbackStrength * bullet.velY;
+        world.players.get(element.id).velX += knockbackX;
+        world.players.get(element.id).velY += knockbackY;
+        bullet.hp -= (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) / 1000;
+      }
+    }
   }
 }

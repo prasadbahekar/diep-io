@@ -16,8 +16,8 @@ export function joinPlayer(renderDistance) {
 export function updateServer(delta) {
   initializeChunks();
   updatePolygons(delta);
-  updateBullets(delta);
   updatePlayers(delta);
+  updateBullets(delta);
   createPacket();
 }
 

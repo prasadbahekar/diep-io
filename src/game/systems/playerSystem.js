@@ -28,8 +28,8 @@ export function initializePlayer(renderDistance) {
   };
 
   world.players.set(player.id, player);
-  player.x = world.properties.worldSize / 2;
-  player.y = world.properties.worldSize / 2;
+  player.x = Math.random() * (5100 - 4500) + 4500;
+  player.y = Math.random() * (5100 - 4500) + 4500;
   return player.id;
 }
 
@@ -159,7 +159,7 @@ function playerCollisions(player, delta) {
       const dy = element.y - player.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const threshold = element.type === "square" ? 50 : element.type === "triangle" ? 50 : 75;
-      if (distance < threshold +5) {
+      if (distance < threshold+3) {
         player.velX -= dx * 0.25;
         player.velY -= dy * 0.25;
       }
@@ -171,6 +171,20 @@ function playerCollisions(player, delta) {
         player.hp -= backDamage * (delta / 300);
         world.polygons.get(element.id).velX += dx * 0.15;
         world.polygons.get(element.id).velY += dy * 0.15;
+      }
+    } else if (element.elType == "player" && element.id !== player.id) {
+      const dx = element.x - player.x;
+      const dy = element.y - player.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < 60) {
+        player.velX -= dx * 0.1;
+        player.velY -= dy * 0.1;
+        const damage = (parseInt(player.upLvl[3] || "0") + 5) * 6 * (delta / 1000);
+        world.players.get(element.id).hp -= damage;
+        world.players.get(element.id).lastHitBy = player.id;
+        player.hp -= (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) * 6 * (delta / 1000);
+        world.players.get(element.id).velX += dx * 0.1;
+        world.players.get(element.id).velY += dy * 0.1;
       }
     }
   }
