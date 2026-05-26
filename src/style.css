@@ -272,6 +272,17 @@ canvas {
     margin-bottom: 64px;
 }
 
+#home-menu #startBtn #startBtnLbl{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#home-menu #startBtn #startBtnLbl img{
+    height: 28px;
+    filter: drop-shadow(0 0 2px black);
+}
+
 #game-ui {
     justify-content: space-between;
     display: none;
@@ -417,12 +428,41 @@ canvas {
     width: 5%;
 }
 
-#game-ui #map {
+#game-ui #btm-rt {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    height: 144px;
-    width: 144px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#game-ui .controls {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 4px 0 4px 6px;
+}
+
+#game-ui .control {
+    display: flex;
+    gap: 6px;
+    height: 36px;
+    align-items: center;
+    text-shadow: none;
+    font-size: 16px;
+    filter: drop-shadow(0 0 1px gray);
+}
+
+#game-ui .control img {
+    height: 90%;
+}
+
+#game-ui #map {
+    position: relative;
+    height: 160px;
+    width: 160px;
     background-color: rgba(0, 0, 0, 0.3);
     border: 4px solid rgba(0, 0, 0, 0.3);
     border-radius: 8px;

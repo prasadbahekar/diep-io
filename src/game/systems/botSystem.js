@@ -16,10 +16,8 @@ export function updateBot(botId) {
     state = "playerDodge"
   } else if (nearest.player) {
     state = "playerAttack";
-    shoot = true;
   } else if (nearest.polygon) {
     state = "polygonAttack";
-    shoot = true;
   }
 
   // Movement
@@ -43,6 +41,7 @@ export function updateBot(botId) {
     moveY = 0;
   }
 
+  console.log(state)
   // Normalize & Cap
   moveX = Math.max(-1, Math.min(1, moveX));
   moveY = Math.max(-1, Math.min(1, moveY));
@@ -56,12 +55,14 @@ export function updateBot(botId) {
   let aimX = 0;
   let aimY = 0;
 
-  if (state == "playerAttack") { 
+  if (state == "playerAttack" || state == "playerDodge") { 
     aimX = nearest.playerDx + world.players.get(nearest.player.id).velX / 1.5;
     aimY = nearest.playerDy + world.players.get(nearest.player.id).velX / 1.5;
+    shoot = true;
   } else if (state == "polygonAttack") {
     aimX = nearest.polygonDx + world.polygons.get(nearest.polygon.id).velX / 1.5;
     aimY = nearest.polygonDy + world.polygons.get(nearest.polygon.id).velY / 1.5;
+    shoot = true;
   }
 
   // Finalize

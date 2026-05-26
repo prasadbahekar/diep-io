@@ -6,6 +6,9 @@ let scrollOffset = -16;
 let smoothOffset = 8;
 let showPanel = false;
 
+const startGamepadEl = document.querySelector("#startBtnLbl img");
+startGamepadEl.style.display = "none";
+
 function createAdvancement(data) {
   const outer = document.createElement("div");
   outer.classList.add("advancement");
@@ -112,10 +115,14 @@ function detectGamepadInput () {
 window.addEventListener("gamepadconnected", (e) => {
   console.log("damn you've a controller?");
   state.game.onGamepad = true;
+  const startGamepadEl = document.querySelector("#startBtnLbl img");
+  startGamepadEl.style.display = "block";
 });
 
 window.addEventListener("gamepaddisconnected", () => {
   state.game.onGamepad = false;
+  const startGamepadEl = document.querySelector("#startBtnLbl img");
+  startGamepadEl.style.display = "none";
 })
 
 // --- Game loop ---

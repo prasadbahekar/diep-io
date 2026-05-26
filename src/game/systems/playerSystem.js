@@ -109,8 +109,8 @@ function playerMovement(player, delta) {
   player.x += (player.velX * delta) / 1000;
   player.y += (player.velY * delta) / 1000;
 
-  player.x = Phaser.Math.Clamp(player.x, 0, world.properties.worldSize);
-  player.y = Phaser.Math.Clamp(player.y, 0, world.properties.worldSize);
+  player.x = Phaser.Math.Clamp(player.x, 0, 9599);
+  player.y = Phaser.Math.Clamp(player.y, 0, 9599);
 }
 
 function playerMetrics(player, delta, updateStats = false) {

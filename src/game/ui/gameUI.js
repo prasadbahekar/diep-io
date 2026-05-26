@@ -11,6 +11,9 @@ let currentWidth = 0;
 let prevLevel = 1;
 let animateProgress = false;
 
+const controlsEl = document.querySelector(".controls")
+controlsEl.style.display = "none";
+
 let upgradeElements = [];
 const statMap = {
   "Health Regen": "regen",
@@ -252,11 +255,15 @@ window.addEventListener("gamepadconnected", (e) => {
   console.log("damn you've a controller?");
   console.log(e.gamepad);
   state.game.onGamepad = true;
+  const controlsEl = document.querySelector(".controls")
+  controlsEl.style.display = "flex";
   // requestAnimationFrame(update);
 });
 
 window.addEventListener("gamepaddisconnected", () => {
   state.game.onGamepad = false;
+  const controlsEl = document.querySelector(".controls")
+  controlsEl.style.display = "none";
 })
 
 //
