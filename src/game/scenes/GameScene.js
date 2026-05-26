@@ -53,7 +53,7 @@ export default class GameScene extends Phaser.Scene {
       this.mouseY = e.clientY;
     });
     
-    window.addEventListener("mousedown", () => {
+    window.addEventListener("mousedown", (e) => {
       if (!state.game.onMobile) this.isMouseDown = true;
     });
 

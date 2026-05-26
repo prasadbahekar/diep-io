@@ -3,7 +3,8 @@ import { regenHP } from "../data/upgrades";
 import { world } from "../server/world";
 import Phaser, { Time } from "phaser";
 import { chunkKeyWorld } from "./chunkSystem";
-import { inputs } from "../utils/input";``
+import { inputs } from "../utils/input";import { getCollisionChunks } from "../utils/functions";
+``
 
 export function initializePlayer(renderDistance) {
   const player = {
@@ -152,39 +153,44 @@ function playerMetrics(player, delta, updateStats = false) {
 }
 
 function playerCollisions(player, delta) {
-  const chunk = world.chunks.get(chunkKeyWorld(player.x, player.y));
-  for (const element of chunk) {
-    if (element.elType == "polygon") {
-      const dx = element.x - player.x;
-      const dy = element.y - player.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const threshold = element.type === "square" ? 50 : element.type === "triangle" ? 50 : 75;
-      if (distance < threshold+3) {
-        player.velX -= dx * 0.25;
-        player.velY -= dy * 0.25;
-      }
-      if (distance < threshold) {
-        const damage = (parseInt(player.upLvl[3] || "0") + 5) * 4 * (delta / 300);
-        world.polygons.get(element.id).hp -= damage;
-        world.polygons.get(element.id).lastHitBy = player.id;
-        const backDamage = element.type === "square" ? 8 : element.type === "triangle" ? 16 : 24;
-        player.hp -= backDamage * (delta / 300);
-        world.polygons.get(element.id).velX += dx * 0.15;
-        world.polygons.get(element.id).velY += dy * 0.15;
-      }
-    } else if (element.elType == "player" && element.id !== player.id) {
-      const dx = element.x - player.x;
-      const dy = element.y - player.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < 60) {
-        player.velX -= dx * 0.1;
-        player.velY -= dy * 0.1;
-        const damage = (parseInt(player.upLvl[3] || "0") + 5) * 6 * (delta / 1000);
-        world.players.get(element.id).hp -= damage;
-        world.players.get(element.id).lastHitBy = player.id;
-        player.hp -= (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) * 6 * (delta / 1000);
-        world.players.get(element.id).velX += dx * 0.1;
-        world.players.get(element.id).velY += dy * 0.1;
+  const chunkKeys = getCollisionChunks(player.x, player.y, 80);
+  for (const key of chunkKeys) {
+    const chunk = world.chunks.get(key);
+    if (!chunk) continue;
+    for (const element of chunk) {
+      if (element.elType == "polygon") {
+        const dx = element.x - player.x;
+        const dy = element.y - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const threshold = element.type === "square" ? 50 : element.type === "triangle" ? 50 : 75;
+        if (distance < threshold+3) {
+          player.velX -= dx * 0.25;
+          player.velY -= dy * 0.25;
+        }
+        if (distance < threshold) {
+          const damage = (parseInt(player.upLvl[3] || "0") + 5) * 4 * (delta / 300);
+          world.polygons.get(element.id).hp -= damage;
+          world.polygons.get(element.id).lastHitBy = player.id;
+          const backDamage = element.type === "square" ? 8 : element.type === "triangle" ? 16 : 24;
+          player.hp -= backDamage * (delta / 300);
+          world.polygons.get(element.id).velX += dx * 0.15;
+          world.polygons.get(element.id).velY += dy * 0.15;
+        }
+      } else if (element.elType == "player" && element.id !== player.id) {
+        const dx = element.x - player.x;
+        const dy = element.y - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        console.log(distance);
+        if (distance < 60) {
+          player.velX -= dx * 0.07;
+          player.velY -= dy * 0.07;
+          const damage = (parseInt(player.upLvl[3] || "0") + 5) * 6 * (delta / 1000);
+          world.players.get(element.id).hp -= damage;
+          world.players.get(element.id).lastHitBy = player.id;
+          player.hp -= (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) * 6 * (delta / 1000);
+          world.players.get(element.id).velX += dx * 0.07;
+          world.players.get(element.id).velY += dy * 0.07;
+        }
       }
     }
   }
