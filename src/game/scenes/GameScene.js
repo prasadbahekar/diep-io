@@ -10,7 +10,8 @@ import Bullet from "../entities/bullet";
 import { packets } from "../server/packet";
 import { getGamepadControls } from "../utils/functions";
 import { Input } from "../utils/input";
-import Enemy from "../entities/enemies";
+import Enemy from "../entities/enemy";
+import { updateBot } from "../systems/botSystem";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -94,7 +95,8 @@ export default class GameScene extends Phaser.Scene {
   update(time, delta) {
     this.updateInput();
     updateServerInput(state.inputMap, state.game.player.id);
-    updateServerInput(new Input(), this.botId);
+    const botInput = updateBot(this.botId);
+    updateServerInput(botInput, this.botId);
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);

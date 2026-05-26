@@ -180,7 +180,6 @@ function playerCollisions(player, delta) {
         const dx = element.x - player.x;
         const dy = element.y - player.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        console.log(distance);
         if (distance < 60) {
           player.velX -= dx * 0.07;
           player.velY -= dy * 0.07;
@@ -235,8 +234,8 @@ function playerShoot(player) {
     player.lastShoot = now;
 
     const angle = player.rotation;
-    const velX = Math.cos(angle) * player.bulletSpeed + player.velX * 0.03;
-    const velY = Math.sin(angle) * player.bulletSpeed + player.velY * 0.03;
+    const velX = Math.cos(angle) * player.bulletSpeed + player.velX * 0.08;
+    const velY = Math.sin(angle) * player.bulletSpeed + player.velY * 0.08;
     const bulletX = player.x + Math.cos(angle) * 24;
     const bulletY = player.y + Math.sin(angle) * 24;
 

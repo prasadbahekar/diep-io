@@ -20,3 +20,18 @@ export function chunkKeyWorld(x, y) {
 export function chunkKey(x, y) {
     return `${x},${y}`;
 }
+
+export function chunkKeysWithNeighbors(x, y) {
+    const chunkX = Math.floor(x / 128);
+    const chunkY = Math.floor(y / 128);
+
+    const chunks = [];
+
+    for (let dx = -2; dx <= 2; dx++) {
+        for (let dy = -2; dy <= 2; dy++) {
+            chunks.push(`${chunkX + dx},${chunkY + dy}`);
+        }
+    }
+
+    return chunks;
+}
