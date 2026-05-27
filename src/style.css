@@ -476,6 +476,15 @@ canvas {
     font-size: 12px;
 }
 
+#game-ui #map .enemyLocation {
+    width: 6px;
+    height: 6px;
+    border-radius: 100%;
+    background-color: #dd3838;
+    position: absolute;
+    box-shadow: 0px 0px 111px 12px rgba(255,46,46,0.6);
+}
+
 #game-ui #left-joystick {
     position: absolute;
     left: 64px;

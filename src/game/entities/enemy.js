@@ -23,20 +23,30 @@ export default class Enemy extends Phaser.GameObjects.Container {
     this.healthBar = scene.add.graphics();
     this.healthBar.setAlpha(0.8);
     this.healthBar.setDepth(3);
+    this.setDepth(2);
   }
 
   update (player, delta) {
     this.x = player.x;
     this.y = player.y;
     this.hp = player.hp
-    this.rotation = player.rotation;
+    this.targetRotation = player.rotation;
     this.scale = getLevelData(player.level).tankSize;
+    this.updateRotation(delta);
+
     this.healthBar.x = player.x;
     this.healthBar.y = player.y;
     if (this.displayHp === undefined) this.displayHp = this.hp;
     this.displayHp += (this.hp - this.displayHp) * 0.99 * (delta / 100);
     this.renderHealthBar(this.displayHp / player.maxHp);
   }
+
+  updateRotation(delta) {
+    const diff = Phaser.Math.Angle.Wrap(this.targetRotation - this.weapons.rotation);
+    const value = this.weapons.rotation + diff * 0.99 * delta / 100;
+    this.weapons.rotation = Number.isFinite(value) ? value : this.weapons.rotation;
+  }
+  
 
   renderHealthBar(percent) {
     this.healthBar.clear();

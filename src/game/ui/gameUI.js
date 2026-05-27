@@ -131,12 +131,28 @@ export function updateGameUI() {
     state.game.player.upgrades > 1 ? `${state.game.player.upgrades}x` : "";
 
   syncUpgradeBars();
+
   // Update Map
   const leftPercent = state.game.player.x / 9600 * 100
   const topPercent = state.game.player.y / 9600 * 100
   playerLocator.style.top = topPercent + "%"
   playerLocator.style.left = leftPercent + "%"
   playerLocator.style.transform = `translate(-${50}%, -${50}%) rotate(${state.game.player.rotation + Math.PI / 2}rad)`
+  for (const player of state.game.enemies) {
+    console.log(player)
+    let playerEl = document.getElementById(player.id);
+    if (!playerEl) {
+      playerEl = document.createElement("div");
+      playerEl.id = player.id;
+      playerEl.classList.add("enemyLocation");
+      map.appendChild(playerEl);
+    }
+    const pTop = player.y / 9600 * 100;
+    const pLeft = player.x / 9600 * 100;
+    playerEl.style.top = (pTop) + "%";
+    playerEl.style.left = (pLeft) + "%";
+    // playerEl.style.transform = `translate(-${50}%, -${50}%)`;
+  }
 }
 
 function updateUpgrades(title) {

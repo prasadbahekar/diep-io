@@ -29,7 +29,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this.updateRotation(delta);
     this.updateDelta(delta);
     this.shoot();
-    this.renderUpdate();
+    this.renderUpdate(delta);
   }
 
   updateRotation(delta) {
@@ -52,7 +52,7 @@ export default class Player extends Phaser.GameObjects.Container {
     } else this.weapon.x = this.weaponOriginalX;
   }
 
-  renderUpdate() {
+  renderUpdate(delta) {
     this.weapon.scaleX = Phaser.Math.Linear(this.weapon.scaleX, 1, 0.05);
     this.scale = getLevelData(state.game.player.level).tankSize;
 
@@ -68,12 +68,15 @@ export default class Player extends Phaser.GameObjects.Container {
     );
 
     // Render Health
-    if (state.game.player.hp == state.game.player.maxHp) this.healthBar.clear();
-    else this.renderHealthBar(state.game.player.hp / state.game.player.maxHp);
+    this.hp = state.game.player.hp
+    if (this.displayHp === undefined) this.displayHp = this.hp;
+    this.displayHp += (this.hp - this.displayHp) * 0.99 * (delta / 100);
+    this.renderHealthBar(this.displayHp / state.game.player.maxHp);
   }
 
   renderHealthBar(percent) {
     this.healthBar.clear();
+    if (percent > 0.99) return;
 
     const width = 24;
     const height = 3;
