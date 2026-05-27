@@ -130,7 +130,7 @@ export function updateGameUI() {
   upgradeCount.textContent =
     state.game.player.upgrades > 1 ? `${state.game.player.upgrades}x` : "";
 
-  syncUpgradeBars();
+  syncUpgradeBars()
 
   // Update Map
   const leftPercent = state.game.player.x / 9600 * 100
@@ -139,7 +139,6 @@ export function updateGameUI() {
   playerLocator.style.left = leftPercent + "%"
   playerLocator.style.transform = `translate(-${50}%, -${50}%) rotate(${state.game.player.rotation + Math.PI / 2}rad)`
   for (const player of state.game.enemies) {
-    console.log(player)
     let playerEl = document.getElementById(player.id);
     if (!playerEl) {
       playerEl = document.createElement("div");
@@ -155,45 +154,45 @@ export function updateGameUI() {
   }
 }
 
-function updateUpgrades(title) {
-  if (state.game.player.upgrades <= 0) return;
+// function updateUpgrades(title) {
+//   if (state.game.player.upgrades <= 0) return;
 
-  const upgradeIndexMap = {
-    "Health Regen": 0,
-    "Max Health": 1,
-    "Bullet Speed": 2,
-    "Body Damage": 3,
-    "Bullet Penetration": 4,
-    "Bullet Damage": 5,
-    "Reload Speed": 6,
-    "Movement Speed": 7,
-  };
+//   const upgradeIndexMap = {
+//     "Health Regen": 0,
+//     "Max Health": 1,
+//     "Bullet Speed": 2,
+//     "Body Damage": 3,
+//     "Bullet Penetration": 4,
+//     "Bullet Damage": 5,
+//     "Reload Speed": 6,
+//     "Movement Speed": 7,
+//   };
 
-  const index = upgradeIndexMap[title];
+//   const index = upgradeIndexMap[title];
 
-  if (index === undefined) return;
-  if (!state.game.player.upLvl) {
-    state.game.player.upLvl = "00000000";
-  }
-  const levels = state.game.player.upLvl.split("");
-  let currentLevel = parseInt(levels[index]);
-  if (currentLevel >= 7) return;
-  currentLevel += 1;
-  levels[index] = currentLevel.toString();
-  state.game.player.upLvl = levels.join("");
-  state.game.player.upgrades -= 1;
-  const upgrade = upgradeElements.find(
-    (elem) => elem.dataset.upgrade === title,
-  );
+//   if (index === undefined) return;
+//   if (!state.game.player.upLvl) {
+//     state.game.player.upLvl = "00000000";
+//   }
+//   const levels = state.game.player.upLvl.split("");
+//   let currentLevel = parseInt(levels[index]);
+//   if (currentLevel >= 7) return;
+//   currentLevel += 1;
+//   levels[index] = currentLevel.toString();
+//   state.game.player.upLvl = levels.join("");
+//   state.game.player.upgrades -= 1;
+//   const upgrade = upgradeElements.find(
+//     (elem) => elem.dataset.upgrade === title,
+//   );
 
-  if (!upgrade) return;
+//   if (!upgrade) return;
 
-  const bars = upgrade.querySelectorAll(".bar");
+//   const bars = upgrade.querySelectorAll(".bar");
 
-  bars.forEach((bar, i) => {
-    bar.style.opacity = i < currentLevel ? "1" : "0";
-  });
-}
+//   bars.forEach((bar, i) => {
+//     bar.style.opacity = i < currentLevel ? "1" : "0";
+//   });
+// }
 
 function syncUpgradeBars() {
   if (!state.game.player.upLvl) {

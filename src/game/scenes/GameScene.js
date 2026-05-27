@@ -26,7 +26,8 @@ export default class GameScene extends Phaser.Scene {
     // Initialize Render Distance
     const renderDistance = Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
     state.game.player.id = joinPlayer(renderDistance);
-    this.botId = joinPlayer(renderDistance)
+    this.botId = joinPlayer(renderDistance);
+    // this.botIdTwo = joinPlayer(renderDistance);
     this.prevLvl = 1;
     this.isAutoRotate = false;
 
@@ -97,6 +98,8 @@ export default class GameScene extends Phaser.Scene {
     updateServerInput(state.inputMap, state.game.player.id);
     const botInput = updateBot(this.botId);
     updateServerInput(botInput, this.botId);
+    // const botInputTwo = updateBot(this.botIdTwo);
+    // updateServerInput(botInputTwo, this.botIdTwo);
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);

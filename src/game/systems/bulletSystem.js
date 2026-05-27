@@ -16,7 +16,6 @@ export function updateBullets(delta) {
     if (bullet.lifespan <= 0 || bullet.force <= 0 || bullet.hp <= 0) {
       world.bullets.delete(bullet.id);
     } else {
-      console.log(bullet.x, bullet.y)
       world.chunks.get(chunkKeyWorld(bullet.x, bullet.y)).add(
         {
           elType: "bullet",

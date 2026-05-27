@@ -11,7 +11,6 @@ export default class Enemy extends Phaser.GameObjects.Container {
     const healthBar = scene.add.graphics();
     super(scene, x, y, [weapons, pBody, healthBar]);
 
-    this.rotation = rotation;
     this.scene = scene;
     this.weapon = weapon;
     this.weapons = weapons;
@@ -19,6 +18,7 @@ export default class Enemy extends Phaser.GameObjects.Container {
     this.weaponOriginalX = 12;
     scene.add.existing(this);
     this.scale = getLevelData(level).tankSize;
+    this.weapons.rotation = rotation;
 
     this.healthBar = scene.add.graphics();
     this.healthBar.setAlpha(0.8);

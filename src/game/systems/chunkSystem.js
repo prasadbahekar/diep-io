@@ -27,8 +27,8 @@ export function chunkKeysWithNeighbors(x, y) {
 
     const chunks = [];
 
-    for (let dx = -2; dx <= 2; dx++) {
-        for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -4; dx <= 4; dx++) {
+        for (let dy = -4; dy <= 4; dy++) {
             chunks.push(`${chunkX + dx},${chunkY + dy}`);
         }
     }
