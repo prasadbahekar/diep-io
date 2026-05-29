@@ -6,8 +6,9 @@ import { chunkKeyWorld } from "./chunkSystem";
 import { inputs } from "../utils/input";import { getCollisionChunks } from "../utils/functions";
 ``
 
-export function initializePlayer(renderDistance) {
+export function initializePlayer(renderDistance, playerName) {
   const player = {
+    name: playerName,
     x: world.properties.worldSize / 2,
     y: world.properties.worldSize / 2,
     rotation: 0,
@@ -57,7 +58,9 @@ function playerChunkUpdate(player) {
       maxHp: player.maxHp,
       rotation: player.rotation,
       id: player.id,
+      score: player.score,
       level: player.level,
+      name: player.name,
     }
   )
 }

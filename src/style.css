@@ -420,7 +420,6 @@ canvas {
 }
 
 #level.progress-bar .progress {
-    /*width: 50%;*/
     background-color: #e7d063;
 }
 
@@ -483,6 +482,48 @@ canvas {
     background-color: #dd3838;
     position: absolute;
     box-shadow: 0px 0px 111px 12px rgba(255,46,46,0.6);
+}
+
+#game-ui #scoreboard {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#game-ui #scoreboard .s-progbar {
+    width: 192px;
+    height: 20px;
+    border-radius: 32px;
+    padding: 2px;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: relative;
+    font-size: 12px;
+    transition: all 0.35s ease;
+}
+
+#game-ui #scoreboard .s-progbar .progress {
+    width: 100%;
+    height: 100%;
+    background-color: #0ca2cc;
+    border-radius: 32px;
+}
+
+#game-ui #scoreboard .s-progbar .prog-score {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-54%);
+}
+
+#game-ui #scoreboard .s-progbar .prog-user {
+    position: absolute;
+    top: 50%;
+    left: 6px;
+    transform: translateY(-54%);
 }
 
 #game-ui #left-joystick {

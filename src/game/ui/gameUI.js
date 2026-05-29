@@ -101,6 +101,7 @@ export function createGameUI() {
   const nameField = document.getElementById("playerNameInput");
   const nameElement = document.getElementById("playerName");
   nameElement.textContent = nameField.value;
+  state.game.player.name = nameField.value;
   detectControlsMode();
 }
 
@@ -130,15 +131,19 @@ export function updateGameUI() {
   upgradeCount.textContent =
     state.game.player.upgrades > 1 ? `${state.game.player.upgrades}x` : "";
 
-  syncUpgradeBars()
-
   // Update Map
+  const players = {}
   const leftPercent = state.game.player.x / 9600 * 100
   const topPercent = state.game.player.y / 9600 * 100
   playerLocator.style.top = topPercent + "%"
   playerLocator.style.left = leftPercent + "%"
   playerLocator.style.transform = `translate(-${50}%, -${50}%) rotate(${state.game.player.rotation + Math.PI / 2}rad)`
+  const activePlayerIds = new Set();
+  players[state.game.player.id] = state.game.player.score;
+  activePlayerIds.add(state.game.player.id);
+
   for (const player of state.game.enemies) {
+    activePlayerIds.add(player.id);
     let playerEl = document.getElementById(player.id);
     if (!playerEl) {
       playerEl = document.createElement("div");
@@ -148,51 +153,54 @@ export function updateGameUI() {
     }
     const pTop = player.y / 9600 * 100;
     const pLeft = player.x / 9600 * 100;
-    playerEl.style.top = (pTop) + "%";
-    playerEl.style.left = (pLeft) + "%";
-    // playerEl.style.transform = `translate(-${50}%, -${50}%)`;
+    playerEl.style.top = pTop + "%";
+    playerEl.style.left = pLeft + "%";
+    playerEl.style.transform = `translate(-50%, -50%)`;
+    players[player.id] = player.score;
   }
+
+  for (const el of map.querySelectorAll(".enemyLocation")) {
+    if (!activePlayerIds.has(el.id)) {
+      el.remove();
+    }
+  }
+
+  syncUpgradeBars()
+  updateScoreboard(Object.entries(players).sort((a, b) => b[1] - a[1]).slice(0, 5));
 }
 
-// function updateUpgrades(title) {
-//   if (state.game.player.upgrades <= 0) return;
+function updateScoreboard(players) {
+  const scoreboard = document.getElementById("scoreboard");
+  if (!scoreboard) return;
+  const topScore = players.length > 0 ? players[0][1] : 1;
 
-//   const upgradeIndexMap = {
-//     "Health Regen": 0,
-//     "Max Health": 1,
-//     "Bullet Speed": 2,
-//     "Body Damage": 3,
-//     "Bullet Penetration": 4,
-//     "Bullet Damage": 5,
-//     "Reload Speed": 6,
-//     "Movement Speed": 7,
-//   };
+  for (const [playerId, playerScore] of players) {
+    let playerEl = scoreboard.querySelector(`#${CSS.escape(playerId + "sb")}`);
+    if (!playerEl) {
+      playerEl = document.createElement("div");
+      playerEl.id = playerId + "sb";
+      playerEl.classList.add("s-progbar");
+      playerEl.innerHTML = `
+        <div class="progress"></div>
+        <p class="prog-score">0</p>
+        <p class="prog-user"></p>
+      `;
+    }
+    const progress = playerEl.querySelector(".progress");
+    const widthPercent = (playerScore / topScore) * 100;
+    progress.style.width = `${widthPercent}%`;
+    playerEl.querySelector(".prog-score").textContent = playerScore;
+    playerEl.querySelector(".prog-user").textContent = (playerId == state.game.player.id) ? state.game.player.name : state.game.enemies.find(item => item.id == playerId).name;
+    scoreboard.appendChild(playerEl);
+  }
 
-//   const index = upgradeIndexMap[title];
-
-//   if (index === undefined) return;
-//   if (!state.game.player.upLvl) {
-//     state.game.player.upLvl = "00000000";
-//   }
-//   const levels = state.game.player.upLvl.split("");
-//   let currentLevel = parseInt(levels[index]);
-//   if (currentLevel >= 7) return;
-//   currentLevel += 1;
-//   levels[index] = currentLevel.toString();
-//   state.game.player.upLvl = levels.join("");
-//   state.game.player.upgrades -= 1;
-//   const upgrade = upgradeElements.find(
-//     (elem) => elem.dataset.upgrade === title,
-//   );
-
-//   if (!upgrade) return;
-
-//   const bars = upgrade.querySelectorAll(".bar");
-
-//   bars.forEach((bar, i) => {
-//     bar.style.opacity = i < currentLevel ? "1" : "0";
-//   });
-// }
+  const activeIds = new Set(players.map(([playerId]) => playerId + "sb"));
+  for (const el of scoreboard.querySelectorAll(".s-progbar")) {
+    if (!activeIds.has(el.id)) {
+      el.remove();
+    }
+  }
+}
 
 function syncUpgradeBars() {
   if (!state.game.player.upLvl) {
