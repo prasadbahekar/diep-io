@@ -47,10 +47,10 @@ function createPacket() {
       topPlayer: topPlayer.id,
     };
 
-    const top5Players = [...world.players.values()]
+    const top6Players = [...world.players.values()]
       .filter(p => p && p.id !== player.id)
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
+      .slice(0, 6)
       .map(p => ({
         elType: "player",
         x: p.x,
@@ -101,7 +101,7 @@ function createPacket() {
     );
 
     packet.enemies.push(
-      ...top5Players.filter(p => !existingIds.has(p.id))
+      ...top6Players.filter(p => !existingIds.has(p.id))
     );
 
     packets[player.id] = packet;

@@ -61,9 +61,8 @@ function checkBulletCollisions(bulletId) {
         const dx = element.x - bullet.x;
         const dy = element.y - bullet.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 15) {
+        if (distance < 12) {
           const damage = bullet.hp - world.bullets.get(element.id).hp;
-          console.log(damage)
           if (damage > 0) {
             bullet.hp = damage;
             world.bullets.get(element.id).hp = 0;
@@ -71,7 +70,6 @@ function checkBulletCollisions(bulletId) {
             bullet.hp = 0;
             world.bullets.get(element.id).hp = damage;
           }
-          console.log("F: " + bullet.hp)
         }
       }
       if (element.elType == "player" && element.id !== bullet.parent) {

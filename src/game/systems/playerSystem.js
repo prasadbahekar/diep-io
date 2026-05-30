@@ -4,7 +4,6 @@ import { world } from "../server/world";
 import Phaser, { Time } from "phaser";
 import { chunkKeyWorld } from "./chunkSystem";
 import { inputs } from "../utils/input";import { getCollisionChunks } from "../utils/functions";
-``
 
 export function initializePlayer(renderDistance, playerName) {
   const player = {

@@ -3,7 +3,7 @@ import { getLevelData } from "../data/levels";
 import { state } from "../state";
 
 export default class Enemy extends Phaser.GameObjects.Container {
-  constructor (scene, x, y, rotation, type, level) {
+  constructor (scene, name, x, y, rotation, type, level) {
     const pBody = scene.add.circle(0, 0, 12, 0xf14e54);
     pBody.setStrokeStyle(1, 0xb43a3f);
     const weapon = scene.add.rectangle(12, 0, 24, 12, 0x9d9d9d);
@@ -13,7 +13,20 @@ export default class Enemy extends Phaser.GameObjects.Container {
     crown.setAlpha(0)
     const weapons = scene.add.container(0, 0, [weapon]);
     const healthBar = scene.add.graphics();
-    super(scene, x, y, [weapons, pBody, crown,  healthBar]);
+
+    // Title 
+    const playerTitle = scene.add.text(0, -20, name, {
+        fontFamily: 'Ubuntu',
+        fontSize: '16px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2
+    });
+    playerTitle.setOrigin(0.5, 0.5)
+    playerTitle.setScale(0.6);
+
+    super(scene, x, y, [weapons, pBody, crown, playerTitle, healthBar]);
 
     this.scene = scene;
     this.crown = crown;

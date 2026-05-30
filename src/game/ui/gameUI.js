@@ -166,7 +166,7 @@ export function updateGameUI() {
   }
 
   syncUpgradeBars()
-  updateScoreboard(Object.entries(players).sort((a, b) => b[1] - a[1]).slice(0, 5));
+  updateScoreboard(Object.entries(players).sort((a, b) => b[1] - a[1]).slice(0, 6));
 }
 
 function updateScoreboard(players) {
@@ -189,8 +189,12 @@ function updateScoreboard(players) {
     const progress = playerEl.querySelector(".progress");
     const widthPercent = (playerScore / topScore) * 100;
     progress.style.width = `${widthPercent}%`;
+    if (state.game.player.id == playerId) {
+      playerEl.classList.add("currentPlayer");
+    }
     playerEl.querySelector(".prog-score").textContent = playerScore;
-    playerEl.querySelector(".prog-user").textContent = (playerId == state.game.player.id) ? state.game.player.name : state.game.enemies.find(item => item.id == playerId).name;
+    const scoreboardName =  (playerId == state.game.player.id) ? state.game.player.name : state.game.enemies.find(item => item.id == playerId).name;
+    playerEl.querySelector(".prog-user").textContent = scoreboardName == "" ? "Unnamed Player" : scoreboardName;
     scoreboard.appendChild(playerEl);
   }
 

@@ -512,6 +512,10 @@ canvas {
     border-radius: 32px;
 }
 
+#game-ui #scoreboard .s-progbar.currentPlayer .progress{ 
+    background-color: #45c7eb;
+}
+
 #game-ui #scoreboard .s-progbar .prog-score {
     position: absolute;
     top: 50%;

@@ -11,6 +11,7 @@ export default class Locator extends Phaser.GameObjects.Container {
         this.title = title;
         this.scene = scene;
         this.arrow = arrow;
+        this.setDepth(9);
     }
 
     update(targetX, targetY) {
@@ -25,12 +26,25 @@ export default class Locator extends Phaser.GameObjects.Container {
             targetY
         );
 
+        if (state.game.player.id == state.game.topPlayer) this.setAlpha(0);
+        else this.setAlpha(1);
+
         this.arrow.setRotation(angle);
     }
 
     getOnscreenPosition(targetX, targetY) {
         const playerX = state.game.player.x;
         const playerY = state.game.player.y;
+
+        const innerWidth = window.innerWidth;
+        const innerHeight = window.innerHeight;
+
+        const screenX = targetX - playerX + innerWidth / 2;
+        const screenY = targetY - playerY + innerHeight / 2;
+        
+        if (screenX >= 0 && screenX <= innerWidth && screenY >= 0 && screenY <= innerHeight) {
+            return { newX: screenX, newY: screenY };
+        }
 
         const dx = targetX - playerX;
         const dy = targetY - playerY;

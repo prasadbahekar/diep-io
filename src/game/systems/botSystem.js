@@ -3,7 +3,10 @@ import { Input } from "../utils/input";
 import { chunkKeysWithNeighbors } from "./chunkSystem";
 
 const natureBuilds = {
-  "fighter": [2, 3, 2, 2, 1, 3, 2, 3]
+  "fighter": [2, 3, 2, 2, 1, 3, 2, 3],
+  "sniper": [2, 2, 5, 1, 1, 5, 4, 3],
+  "tank": [4, 5, 2, 1, 3, 2, 3, 4],
+  "rammer": [3, 4, 3, 5, 2, 2, 5],
 }
 
 const upgradeTitles = [
@@ -25,7 +28,7 @@ export function updateBot(botId) {
 
   // Upgrades
   if (!bot.nature) {
-    const natures = ["fighter"];
+    const natures = Object.keys(natureBuilds);
     world.players.get(botId).nature = natures[Math.floor(Math.random() * natures.length)];
   }
 

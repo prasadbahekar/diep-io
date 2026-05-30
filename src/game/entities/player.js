@@ -15,6 +15,7 @@ export default class Player extends Phaser.GameObjects.Container {
     crown.setAlpha(0)
     const weapons = scene.add.container(0, 0, [weapon]);
     const healthBar = scene.add.graphics();
+
     super(scene, x, y, [weapons, pBody, crown, healthBar]);
 
     this.scene = scene;

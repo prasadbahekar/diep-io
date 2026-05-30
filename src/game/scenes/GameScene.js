@@ -14,6 +14,49 @@ import Enemy from "../entities/enemy";
 import { updateBot } from "../systems/botSystem";
 import Locator from "../entities/locator";
 
+const botNames = [
+  "NovaCore",
+  "ShadowX",
+  "CyberHex",
+  "IronByte",
+  "VoidPulse",
+  "NeoStrike",
+  "DarkCore",
+  "AlphaNex",
+  "QuantumX",
+  "GhostWire",
+  "SteelFlux",
+  "HyperByte",
+  "TitanHex",
+  "EchoCore",
+  "NanoVolt",
+  "AeroNex",
+  "BlazeBot",
+  "TurboHex",
+  "StormNet",
+  "FrostCore",
+  "OmegaByte",
+  "PixelNex",
+  "LunarHex",
+  "SolarBot",
+  "RapidCore",
+  "AstroNet",
+  "VectorX",
+  "CrimsonAI",
+  "PhantomX",
+  "NeonCore",
+  "FusionBot",
+  "DeltaHex",
+  "CyberNex",
+  "IronVolt",
+  "VoidByte",
+  "NovaFlux",
+  "ShadowNet",
+  "TitanCore",
+  "GhostHex",
+  "QuantumAI"
+];
+
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: "GameScene" });
@@ -32,8 +75,6 @@ export default class GameScene extends Phaser.Scene {
     // Initialize Render Distance
     const renderDistance = Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
     state.game.player.id = joinPlayer(renderDistance, state.game.player.name);
-    this.botId = joinPlayer(renderDistance, "Bot");
-    // this.botIdTwo = joinPlayer(renderDistance);
     this.prevLvl = 1;
     this.isAutoRotate = false;
 
@@ -74,6 +115,13 @@ export default class GameScene extends Phaser.Scene {
         this.isAutoRotate = !this.isAutoRotate;
       }
     });
+    
+    // Bots 
+    this.bots = [];
+    for (let i = 0; i < 5; i++) {
+      const botId = joinPlayer(renderDistance, botNames[Math.floor(Math.random() * botNames.length)]);
+      this.bots.push(botId);
+    }
 
     // Player
     this.player = new Player(this, this.worldSize / 2, this.worldSize / 2);
@@ -105,10 +153,7 @@ export default class GameScene extends Phaser.Scene {
   update(time, delta) {
     this.updateInput();
     updateServerInput(state.inputMap, state.game.player.id);
-    const botInput = updateBot(this.botId);
-    updateServerInput(botInput, this.botId);
-    // const botInputTwo = updateBot(this.botIdTwo);
-    // updateServerInput(botInputTwo, this.botIdTwo);
+    this.updateBots();
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);
@@ -134,6 +179,13 @@ export default class GameScene extends Phaser.Scene {
       0,
       this.worldSize - this.grid.height
     );
+  }
+
+  updateBots () {
+    for (const bot of this.bots) {
+      const botInput = updateBot(bot);
+      updateServerInput(botInput, bot);
+    }
   }
 
   updateLocalTruth() {
@@ -190,9 +242,12 @@ export default class GameScene extends Phaser.Scene {
   }
 
   updateLocators () {
-    if (state.game.topPlayer == state.game.player.id) return;
-    const bot = state.game.enemies.find(p => p.id == state.game.topPlayer);
-    this.topLocator.update(bot.x, bot.y)
+    if (state.game.topPlayer != state.game.player.id) {
+      const bot = state.game.enemies.find(p => p.id == state.game.topPlayer);
+      this.topLocator.update(bot.x, bot.y)
+    } else {
+      this.topLocator.update(0, 0);
+    }
   }
 
   updateBullets() {
@@ -292,7 +347,7 @@ export default class GameScene extends Phaser.Scene {
       } else {
         this.renderedEnemies.set(
           id,
-          new Enemy(this, e.x, e.y, e.rotation, e.type, e.level)
+          new Enemy(this, e.name, e.x, e.y, e.rotation, e.type, e.level)
         );
       }
     }
