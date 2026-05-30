@@ -5,7 +5,7 @@ import Phaser, { Time } from "phaser";
 import { chunkKeyWorld } from "./chunkSystem";
 import { inputs } from "../utils/input";import { getCollisionChunks } from "../utils/functions";
 
-export function initializePlayer(renderDistance, playerName) {
+export function initializePlayer(renderDistance, playerName, isBot) {
   const player = {
     name: playerName,
     x: world.properties.worldSize / 2,
@@ -25,6 +25,7 @@ export function initializePlayer(renderDistance, playerName) {
     reload: 0.6,
     bulletSpeed: 20,
     renderDistance: renderDistance,
+    isBot: isBot,
     id: crypto.randomUUID(),
   };
 
@@ -36,6 +37,12 @@ export function initializePlayer(renderDistance, playerName) {
 
 export function updatePlayers(delta) {
   world.players.forEach((player) => {
+    if (player.hp <= 0 && player.isBot) {
+      const lastHitPlayer = world.players.get(player.lastHitBy);
+      if (lastHitPlayer) lastHitPlayer.score += player.score;
+      world.players.delete(player.id);
+      return;
+    }
     playerMovement(player, delta);
     playerRotation(player, delta);
     playerShoot(player);

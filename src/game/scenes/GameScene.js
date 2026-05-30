@@ -119,7 +119,7 @@ export default class GameScene extends Phaser.Scene {
     // Bots 
     this.bots = [];
     for (let i = 0; i < 5; i++) {
-      const botId = joinPlayer(renderDistance, botNames[Math.floor(Math.random() * botNames.length)]);
+      const botId = joinPlayer(renderDistance, botNames[Math.floor(Math.random() * botNames.length)], true);
       this.bots.push(botId);
     }
 
@@ -183,6 +183,7 @@ export default class GameScene extends Phaser.Scene {
 
   updateBots () {
     for (const bot of this.bots) {
+      // if (!state.game.enemies.find(p => p.id == bot)) continue;
       const botInput = updateBot(bot);
       updateServerInput(botInput, bot);
     }

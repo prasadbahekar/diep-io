@@ -7,10 +7,10 @@ import { world } from "./world";
 import { getRandomInt } from "../utils/functions";
 import { inputs } from "../utils/input";
 
-export function joinPlayer(renderDistance, playerName) {
+export function joinPlayer(renderDistance, playerName, bot = false) {
   const types = ["square", "square", "triangle", "triangle", "pentagon"];
   for (let i = 0; i < 50; i++) createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), types[getRandomInt(0, types.length - 1)]);
-  return initializePlayer(renderDistance, playerName);
+  return initializePlayer(renderDistance, playerName, bot);
 }
 
 export function updateServer(delta) {

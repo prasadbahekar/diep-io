@@ -22,6 +22,7 @@ const upgradeTitles = [
 
 export function updateBot(botId) {
   const bot = world.players.get(botId);
+  if (!bot) return;
   const nearest = nearestObjects(bot.x, bot.y, botId);
   const input = new Input();
   let shoot = false;
@@ -62,7 +63,7 @@ export function updateBot(botId) {
     const myLevel = bot.level;
     const enemyLevel = enemy.level;
     const myPower = (myLevel * 0.7) + (myHp * 10 * 0.3);
-    const enemyPower = (enemyLevel * 0.7) + (enemyHp * 10 * 0.3);
+    const enemyPower = (enemyLevel * 0.5) + (enemyHp * 10 * 0.3);
 
     const confidence = myPower - enemyPower;
     const dx = nearest.playerDx;

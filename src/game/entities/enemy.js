@@ -85,4 +85,9 @@ export default class Enemy extends Phaser.GameObjects.Container {
     this.healthBar.lineStyle(2, 0x444444);
     this.healthBar.strokeRoundedRect(x, y, width, height, radius);
   }
+
+  destroy(fromScene) {
+    this.healthBar.destroy();
+    super.destroy(fromScene);
+  }
 }
