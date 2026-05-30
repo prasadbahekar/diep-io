@@ -30,8 +30,8 @@ export function initializePlayer(renderDistance, playerName) {
   };
 
   world.players.set(player.id, player);
-  player.x = Math.random() * (5100 - 4500) + 4500;
-  player.y = Math.random() * (5100 - 4500) + 4500;
+  player.x = Math.random() * 9000 + 400;
+  player.y = Math.random() * 9000 + 400;
   return player.id;
 }
 

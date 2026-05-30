@@ -26,6 +26,7 @@ export function updateServerInput(input, playerId) {
 }
 
 function createPacket() {
+  const topPlayer = world.players.values().reduce((max, obj) => {return obj.score > max.score ? obj : max;});
   for (const player of world.players.values()) {
     if (!player) continue;
 
@@ -43,6 +44,7 @@ function createPacket() {
       hp: player.hp,
       maxHp: player.maxHp,
       now: Date.now(),
+      topPlayer: topPlayer.id,
     };
 
     const top5Players = [...world.players.values()]
@@ -55,6 +57,7 @@ function createPacket() {
         y: p.y,
         type: "basic",
         hp: p.hp,
+        name: p.name,
         maxHp: p.maxHp,
         rotation: p.rotation,
         id: p.id,
@@ -64,6 +67,7 @@ function createPacket() {
 
     const playerChunkX = Math.floor(player.x / 128);
     const playerChunkY = Math.floor(player.y / 128);
+    Math.floor(player.y / 128);
 
     for (let dx = -player.renderDistance; dx <= player.renderDistance; dx++) {
       for (let dy = -player.renderDistance; dy <= player.renderDistance; dy++) {

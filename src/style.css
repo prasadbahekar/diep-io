@@ -502,7 +502,7 @@ canvas {
     background-color: rgba(0, 0, 0, 0.5);
     position: relative;
     font-size: 12px;
-    transition: all 0.35s ease;
+    transition: all 0.35s ease; 
 }
 
 #game-ui #scoreboard .s-progbar .progress {

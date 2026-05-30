@@ -12,6 +12,7 @@ export const state = {
     onGamepad: false,
     started: false,
     packetNow: 0,
+    topPlayer: null,
     player: {
       name: "PiGuy141",
       id: 1,

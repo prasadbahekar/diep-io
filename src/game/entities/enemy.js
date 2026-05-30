@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { getLevelData } from "../data/levels";
+import { state } from "../state";
 
 export default class Enemy extends Phaser.GameObjects.Container {
   constructor (scene, x, y, rotation, type, level) {
@@ -7,11 +8,15 @@ export default class Enemy extends Phaser.GameObjects.Container {
     pBody.setStrokeStyle(1, 0xb43a3f);
     const weapon = scene.add.rectangle(12, 0, 24, 12, 0x9d9d9d);
     weapon.setStrokeStyle(1, 0x787878);
+    const crown = scene.add.image(0, -16, "crown");
+    crown.setScale(0.03);
+    crown.setAlpha(0)
     const weapons = scene.add.container(0, 0, [weapon]);
     const healthBar = scene.add.graphics();
-    super(scene, x, y, [weapons, pBody, healthBar]);
+    super(scene, x, y, [weapons, pBody, crown,  healthBar]);
 
     this.scene = scene;
+    this.crown = crown;
     this.weapon = weapon;
     this.weapons = weapons;
     this.healthBar = healthBar;
@@ -19,7 +24,6 @@ export default class Enemy extends Phaser.GameObjects.Container {
     scene.add.existing(this);
     this.scale = getLevelData(level).tankSize;
     this.weapons.rotation = rotation;
-
     this.healthBar = scene.add.graphics();
     this.healthBar.setAlpha(0.8);
     this.healthBar.setDepth(3);
@@ -29,11 +33,12 @@ export default class Enemy extends Phaser.GameObjects.Container {
   update (player, delta) {
     this.x = player.x;
     this.y = player.y;
-    this.hp = player.hp
+    this.hp = player.hp;
     this.targetRotation = player.rotation;
     this.scale = getLevelData(player.level).tankSize;
     this.updateRotation(delta);
-
+    if (state.game.topPlayer == player.id) this.crown.setAlpha(0.9);
+    else this.crown.setAlpha(0);
     this.healthBar.x = player.x;
     this.healthBar.y = player.y;
     if (this.displayHp === undefined) this.displayHp = this.hp;

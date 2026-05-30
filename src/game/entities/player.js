@@ -10,11 +10,15 @@ export default class Player extends Phaser.GameObjects.Container {
     pBody.setStrokeStyle(1, 0x0f88a9);
     const weapon = scene.add.rectangle(12, 0, 24, 12, 0x9d9d9d);
     weapon.setStrokeStyle(1, 0x787878);
+    const crown = scene.add.image(0, -16, "crown");
+    crown.setScale(0.03);
+    crown.setAlpha(0)
     const weapons = scene.add.container(0, 0, [weapon]);
     const healthBar = scene.add.graphics();
-    super(scene, x, y, [weapons, pBody, healthBar]);
+    super(scene, x, y, [weapons, pBody, crown, healthBar]);
 
     this.scene = scene;
+    this.crown = crown;
     this.weapon = weapon;
     this.weapons = weapons;
     this.healthBar = healthBar;
@@ -26,6 +30,8 @@ export default class Player extends Phaser.GameObjects.Container {
   update(delta) {
     this.x = state.game.player.x;
     this.y = state.game.player.y;
+    if (state.game.topPlayer == state.game.player.id) this.crown.setAlpha(0.9);
+    else this.crown.setAlpha(0);
     this.updateRotation(delta);
     this.updateDelta(delta);
     this.shoot();

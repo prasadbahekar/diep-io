@@ -12,10 +12,16 @@ import { getGamepadControls } from "../utils/functions";
 import { Input } from "../utils/input";
 import Enemy from "../entities/enemy";
 import { updateBot } from "../systems/botSystem";
+import Locator from "../entities/locator";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: "GameScene" });
+  }
+
+  preload () {
+    this.load.image("crown", `${import.meta.env.BASE_URL}assets/textures/game/crown.png`);
+    this.load.image("arrow", `${import.meta.env.BASE_URL}assets/textures/game/arrow.png`);
   }
 
   create() {
@@ -80,6 +86,9 @@ export default class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, this.worldSize, this.worldSize);
     this.cameras.main.setBounds(0, 0, this.worldSize, this.worldSize);
 
+    // Boss Locator
+    this.topLocator = new Locator(this, 0, 0, "Top Player")
+
     // Grid
     this.chunkScreen = Math.max(innerHeight, innerWidth) + this.cellSize * 30; 
     const chunkCellSize = Math.floor(this.chunkScreen / this.cellSize);
@@ -106,6 +115,8 @@ export default class GameScene extends Phaser.Scene {
     this.updateBullets();
     this.updatePolygons(delta);
     this.updateEnemies(delta);
+    // this.topLocator.update(0, 0)
+    this.updateLocators()
     updateGameUI();
 
     state.game.player.prevX = state.game.player.x;
@@ -123,7 +134,7 @@ export default class GameScene extends Phaser.Scene {
       0,
       this.worldSize - this.grid.height
     );
-}
+  }
 
   updateLocalTruth() {
     const packet = packets[state.game.player.id];
@@ -137,6 +148,7 @@ export default class GameScene extends Phaser.Scene {
     state.game.player.upLvl = packet.player.upLvls;
     state.game.player.hp = packet.player.hp;
     state.game.player.maxHp = packet.player.maxHp;
+    state.game.topPlayer = packet.player.topPlayer;
 
     state.game.bullets = packet.bullets;
     state.game.polygons = packet.polygons;
@@ -175,6 +187,12 @@ export default class GameScene extends Phaser.Scene {
       state.inputMap.isAutoRotate = this.isAutoRotate;
     }
 
+  }
+
+  updateLocators () {
+    if (state.game.topPlayer == state.game.player.id) return;
+    const bot = state.game.enemies.find(p => p.id == state.game.topPlayer);
+    this.topLocator.update(bot.x, bot.y)
   }
 
   updateBullets() {
