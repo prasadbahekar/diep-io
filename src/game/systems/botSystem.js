@@ -1,13 +1,13 @@
 import { world } from "../server/world";
-import { Input } from "../utils/input";
+import { Input, inputs } from "../utils/input";
 import { chunkKeysWithNeighbors } from "./chunkSystem";
 
 const natureBuilds = {
-  "fighter": [2, 3, 2, 2, 1, 3, 2, 3],
-  "sniper": [2, 2, 5, 1, 1, 5, 4, 3],
-  "tank": [4, 5, 2, 1, 3, 2, 3, 4],
-  "rammer": [3, 4, 3, 5, 2, 2, 5],
-}
+  fighter: [2, 3, 2, 2, 1, 3, 2, 3],
+  sniper: [2, 2, 5, 1, 1, 5, 4, 3],
+  tank: [4, 5, 2, 1, 3, 2, 3, 4],
+  rammer: [3, 4, 3, 5, 2, 2, 5],
+};
 
 const upgradeTitles = [
   "Health Regen",
@@ -20,7 +20,14 @@ const upgradeTitles = [
   "Movement Speed",
 ];
 
-export function updateBot(botId) {
+export function updateBots() {
+  for (const bot of world.players.values()) {
+    if (!bot.isBot) continue;
+    inputs[bot.id] = updateBot(bot.id);
+  }
+}
+
+function updateBot(botId) {
   const bot = world.players.get(botId);
   if (!bot) return;
   const nearest = nearestObjects(bot.x, bot.y, botId);
@@ -30,21 +37,25 @@ export function updateBot(botId) {
   // Upgrades
   if (!bot.nature) {
     const natures = Object.keys(natureBuilds);
-    world.players.get(botId).nature = natures[Math.floor(Math.random() * natures.length)];
+    world.players.get(botId).nature =
+      natures[Math.floor(Math.random() * natures.length)];
   }
 
   let upgradeTitle = null;
   if (bot.upgrades > 0) {
-    const bestIndex = balancedIncrement(natureBuilds[bot.nature], bot.upLvl.split("").map(Number));
+    const bestIndex = balancedIncrement(
+      natureBuilds[bot.nature],
+      bot.upLvl.split("").map(Number),
+    );
     upgradeTitle = upgradeTitles[bestIndex];
   }
 
   console.log(bot.upLvl);
 
   // State
-  let state = "wander"
+  let state = "wander";
   if (nearest.player && nearest.player.level > bot.level) {
-    state = "playerDodge"
+    state = "playerDodge";
   } else if (nearest.player) {
     state = "playerAttack";
   } else if (nearest.polygon) {
@@ -62,8 +73,8 @@ export function updateBot(botId) {
     const enemyHp = enemy.hp / enemy.maxHp;
     const myLevel = bot.level;
     const enemyLevel = enemy.level;
-    const myPower = (myLevel * 0.7) + (myHp * 10 * 0.3);
-    const enemyPower = (enemyLevel * 0.5) + (enemyHp * 10 * 0.3);
+    const myPower = myLevel * 0.7 + myHp * 10 * 0.3;
+    const enemyPower = enemyLevel * 0.5 + enemyHp * 10 * 0.3;
 
     const confidence = myPower - enemyPower;
     const dx = nearest.playerDx;
@@ -140,7 +151,7 @@ export function updateBot(botId) {
       player.wander = {
         angle: Math.random() * Math.PI * 2,
         timer: 0,
-        target: null
+        target: null,
       };
     }
 
@@ -151,7 +162,10 @@ export function updateBot(botId) {
       const distance = 300 + Math.random() * 400;
       const tx = bot.x + Math.cos(wander.angle) * distance;
       const ty = bot.y + Math.sin(wander.angle) * distance;
-      wander.target = {x: Math.max(0, Math.min(9599, tx)), y: Math.max(0, Math.min(9599, ty))};
+      wander.target = {
+        x: Math.max(0, Math.min(9599, tx)),
+        y: Math.max(0, Math.min(9599, ty)),
+      };
       wander.timer = 120 + Math.random() * 180;
     }
 
@@ -166,15 +180,9 @@ export function updateBot(botId) {
       moveX += (dx / dist) * speed;
       moveY += (dy / dist) * speed;
     }
-
   } else world.players.get(botId).wander = null;
-  
-  if (
-    bot.x < 750 ||
-    bot.x > 9600 - 750 ||
-    bot.y < 750 ||
-    bot.y > 9600 - 750
-  ) {
+
+  if (bot.x < 750 || bot.x > 9600 - 750 || bot.y < 750 || bot.y > 9600 - 750) {
     const dx = 4800 - bot.x;
     const dy = 4800 - bot.y;
     const dist = Math.hypot(dx, dy);
@@ -198,15 +206,17 @@ export function updateBot(botId) {
   let aimX = 0;
   let aimY = 0;
 
-  if (state == "playerAttack" || state == "playerDodge") { 
+  if (state == "playerAttack" || state == "playerDodge") {
     aimX = nearest.playerDx + world.players.get(nearest.player.id).velX / 1.5;
     aimY = nearest.playerDy + world.players.get(nearest.player.id).velY / 1.5;
     shoot = true;
   }
 
   if (state == "polygonAttack") {
-    aimX = nearest.polygonDx + world.polygons.get(nearest.polygon.id).velX * 0.3;
-    aimY = nearest.polygonDy + world.polygons.get(nearest.polygon.id).velY * 0.3;
+    aimX =
+      nearest.polygonDx + world.polygons.get(nearest.polygon.id).velX * 0.3;
+    aimY =
+      nearest.polygonDy + world.polygons.get(nearest.polygon.id).velY * 0.3;
     shoot = true;
   }
 
@@ -284,39 +294,45 @@ function nearestObjects(x, y, parent) {
   }
 
   return {
-    polygon, polygonDistance, polygonDx, polygonDy,
-    bullet, bulletDistance, bulletDx, bulletDy,
-    player, playerDistance, playerDx, playerDy,
+    polygon,
+    polygonDistance,
+    polygonDx,
+    polygonDy,
+    bullet,
+    bulletDistance,
+    bulletDx,
+    bulletDy,
+    player,
+    playerDistance,
+    playerDx,
+    playerDy,
   };
 }
 
 function balancedIncrement(targetRatio, actualValues) {
-    const totalTarget =
-        targetRatio.reduce((a, b) => a + b, 0);
+  const totalTarget = targetRatio.reduce((a, b) => a + b, 0);
 
-    const totalActual =
-        actualValues.reduce((a, b) => a + b, 0);
+  const totalActual = actualValues.reduce((a, b) => a + b, 0);
 
-    let bestIndex = -1;
-    let biggestDeficit = -Infinity;
+  let bestIndex = -1;
+  let biggestDeficit = -Infinity;
 
-    for (let i = 0; i < targetRatio.length; i++) {
-        if (targetRatio[i] <= 0) continue;
+  for (let i = 0; i < targetRatio.length; i++) {
+    if (targetRatio[i] <= 0) continue;
 
-        const expected =
-            totalActual * (targetRatio[i] / totalTarget);
+    const expected = totalActual * (targetRatio[i] / totalTarget);
 
-        const deficit = expected - actualValues[i];
+    const deficit = expected - actualValues[i];
 
-        if (deficit > biggestDeficit) {
-            biggestDeficit = deficit;
-            bestIndex = i;
-        }
+    if (deficit > biggestDeficit) {
+      biggestDeficit = deficit;
+      bestIndex = i;
     }
+  }
 
-    if (bestIndex !== -1) {
-        actualValues[bestIndex]++;
-    }
+  if (bestIndex !== -1) {
+    actualValues[bestIndex]++;
+  }
 
-    return bestIndex;
+  return bestIndex;
 }

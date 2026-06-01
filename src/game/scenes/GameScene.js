@@ -1,70 +1,34 @@
 import Phaser from "phaser";
 import Player from "../entities/player";
-import { createGameUI, getMobileControls, setMobileControls, updateGameUI } from "../ui/gameUI";
+import {
+  createGameUI,
+  getMobileControls,
+  setMobileControls,
+  updateGameUI,
+} from "../ui/gameUI";
 import { state } from "../state";
-import { getLevelFromScore } from "../data/levels";
-import { regenHP } from "../data/upgrades";
 import Polygon from "../entities/polygon";
 import { updateServer, joinPlayer, updateServerInput } from "../server/server";
 import Bullet from "../entities/bullet";
 import { packets } from "../server/packet";
 import { getGamepadControls } from "../utils/functions";
-import { Input } from "../utils/input";
 import Enemy from "../entities/enemy";
-import { updateBot } from "../systems/botSystem";
 import Locator from "../entities/locator";
-
-const botNames = [
-  "NovaCore",
-  "ShadowX",
-  "CyberHex",
-  "IronByte",
-  "VoidPulse",
-  "NeoStrike",
-  "DarkCore",
-  "AlphaNex",
-  "QuantumX",
-  "GhostWire",
-  "SteelFlux",
-  "HyperByte",
-  "TitanHex",
-  "EchoCore",
-  "NanoVolt",
-  "AeroNex",
-  "BlazeBot",
-  "TurboHex",
-  "StormNet",
-  "FrostCore",
-  "OmegaByte",
-  "PixelNex",
-  "LunarHex",
-  "SolarBot",
-  "RapidCore",
-  "AstroNet",
-  "VectorX",
-  "CrimsonAI",
-  "PhantomX",
-  "NeonCore",
-  "FusionBot",
-  "DeltaHex",
-  "CyberNex",
-  "IronVolt",
-  "VoidByte",
-  "NovaFlux",
-  "ShadowNet",
-  "TitanCore",
-  "GhostHex",
-  "QuantumAI"
-];
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: "GameScene" });
   }
 
-  preload () {
-    this.load.image("crown", `${import.meta.env.BASE_URL}assets/textures/game/crown.png`);
-    this.load.image("arrow", `${import.meta.env.BASE_URL}assets/textures/game/arrow.png`);
+  preload() {
+    this.load.image(
+      "crown",
+      `${import.meta.env.BASE_URL}assets/textures/game/crown.png`,
+    );
+    this.load.image(
+      "arrow",
+      `${import.meta.env.BASE_URL}assets/textures/game/arrow.png`,
+    );
   }
 
   create() {
@@ -73,7 +37,8 @@ export default class GameScene extends Phaser.Scene {
     this.worldSize = 400 * this.cellSize;
 
     // Initialize Render Distance
-    const renderDistance = Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
+    const renderDistance =
+      Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
     state.game.player.id = joinPlayer(renderDistance, state.game.player.name);
     this.prevLvl = 1;
     this.isAutoRotate = false;
@@ -101,7 +66,7 @@ export default class GameScene extends Phaser.Scene {
       this.mouseX = e.clientX;
       this.mouseY = e.clientY;
     });
-    
+
     window.addEventListener("mousedown", (e) => {
       if (!state.game.onMobile) this.isMouseDown = true;
     });
@@ -115,13 +80,13 @@ export default class GameScene extends Phaser.Scene {
         this.isAutoRotate = !this.isAutoRotate;
       }
     });
-    
-    // Bots 
-    this.bots = [];
-    for (let i = 0; i < 5; i++) {
-      const botId = joinPlayer(renderDistance, botNames[Math.floor(Math.random() * botNames.length)], true);
-      this.bots.push(botId);
-    }
+
+    // Bots
+    // this.bots = [];
+    // for (let i = 0; i < 5; i++) {
+    //   const botId = joinPlayer(renderDistance, botNames[Math.floor(Math.random() * botNames.length)], true);
+    //   this.bots.push(botId);
+    // }
 
     // Player
     this.player = new Player(this, this.worldSize / 2, this.worldSize / 2);
@@ -135,13 +100,24 @@ export default class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, this.worldSize, this.worldSize);
 
     // Boss Locator
-    this.topLocator = new Locator(this, 0, 0, "Top Player")
+    this.topLocator = new Locator(this, 0, 0, "Top Player");
 
     // Grid
-    this.chunkScreen = Math.max(innerHeight, innerWidth) + this.cellSize * 30; 
+    this.chunkScreen = Math.max(innerHeight, innerWidth) + this.cellSize * 40;
     const chunkCellSize = Math.floor(this.chunkScreen / this.cellSize);
     this.grid = this.add
-      .grid(0, 0, chunkCellSize * this.cellSize, chunkCellSize * this.cellSize, 24, 24, 0xcccccc, 1, 0xbbbbbb, 1)
+      .grid(
+        0,
+        0,
+        chunkCellSize * this.cellSize,
+        chunkCellSize * this.cellSize,
+        24,
+        24,
+        0xcccccc,
+        1,
+        0xbbbbbb,
+        1,
+      )
       .setOrigin(0, 0);
 
     this.grid.setDepth(-1);
@@ -153,7 +129,6 @@ export default class GameScene extends Phaser.Scene {
   update(time, delta) {
     this.updateInput();
     updateServerInput(state.inputMap, state.game.player.id);
-    this.updateBots();
     updateServer(delta);
     this.updateLocalTruth();
     this.player.update(delta);
@@ -161,7 +136,7 @@ export default class GameScene extends Phaser.Scene {
     this.updatePolygons(delta);
     this.updateEnemies(delta);
     // this.topLocator.update(0, 0)
-    this.updateLocators()
+    this.updateLocators();
     updateGameUI();
 
     state.game.player.prevX = state.game.player.x;
@@ -169,24 +144,18 @@ export default class GameScene extends Phaser.Scene {
     state.inputMap.upgrade = null;
 
     this.grid.x = Phaser.Math.Clamp(
-      Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize - this.cellSize * 12,
+      Math.floor(this.cameras.main.scrollX / this.cellSize) * this.cellSize -
+        this.cellSize * 20,
       0,
-      this.worldSize - this.grid.width
+      this.worldSize - this.grid.width,
     );
 
     this.grid.y = Phaser.Math.Clamp(
-      Math.floor(this.cameras.main.scrollY / this.cellSize) * this.cellSize - this.cellSize * 12,
+      Math.floor(this.cameras.main.scrollY / this.cellSize) * this.cellSize -
+        this.cellSize * 20,
       0,
-      this.worldSize - this.grid.height
+      this.worldSize - this.grid.height,
     );
-  }
-
-  updateBots () {
-    for (const bot of this.bots) {
-      // if (!state.game.enemies.find(p => p.id == bot)) continue;
-      const botInput = updateBot(bot);
-      updateServerInput(botInput, bot);
-    }
   }
 
   updateLocalTruth() {
@@ -208,19 +177,25 @@ export default class GameScene extends Phaser.Scene {
     state.game.enemies = packet.enemies;
     state.game.packetNow = packet.player.now;
   }
- 
+
   updateInput() {
     if (state.game.onGamepad) {
       const gamepad = getGamepadControls();
-      state.inputMap.moveX = Math.abs(gamepad.axes[0]) < 0.001 ? 0 : gamepad.axes[0];
-      state.inputMap.moveY = Math.abs(gamepad.axes[1]) < 0.001 ? 0 : gamepad.axes[1];
-      this.gamepadX = Math.abs(gamepad.axes[2]) < 0.1 ? this.gamepadX : gamepad.axes[2] * 100;
-      this.gamepadY = Math.abs(gamepad.axes[3]) < 0.1 ? this.gamepadY : gamepad.axes[3] * 100;
+      state.inputMap.moveX =
+        Math.abs(gamepad.axes[0]) < 0.001 ? 0 : gamepad.axes[0];
+      state.inputMap.moveY =
+        Math.abs(gamepad.axes[1]) < 0.001 ? 0 : gamepad.axes[1];
+      this.gamepadX =
+        Math.abs(gamepad.axes[2]) < 0.1 ? this.gamepadX : gamepad.axes[2] * 100;
+      this.gamepadY =
+        Math.abs(gamepad.axes[3]) < 0.1 ? this.gamepadY : gamepad.axes[3] * 100;
       state.inputMap.mouseX = this.player.x + this.gamepadX;
       state.inputMap.mouseY = this.player.y + this.gamepadY;
-      state.inputMap.shoot = gamepad.buttons[6].pressed || gamepad.buttons[7].pressed;
+      state.inputMap.shoot =
+        gamepad.buttons[6].pressed || gamepad.buttons[7].pressed;
       const dpadDownPressed = gamepad.buttons[13].pressed;
-      if (dpadDownPressed && !this.prevDpadDown) this.gamepadAutoR = !this.gamepadAutoR;
+      if (dpadDownPressed && !this.prevDpadDown)
+        this.gamepadAutoR = !this.gamepadAutoR;
       this.prevDpadDown = dpadDownPressed;
       state.inputMap.isAutoRotate = this.gamepadAutoR;
     } else if (state.game.onMobile) {
@@ -229,23 +204,30 @@ export default class GameScene extends Phaser.Scene {
       state.inputMap.moveY = controls.move.y;
       state.inputMap.mouseX = this.player.x + controls.fire.x * 100;
       state.inputMap.mouseY = this.player.y + controls.fire.y * 100;
-      state.inputMap.shoot = Math.abs(controls.fire.x) > 0.1 || Math.abs(controls.fire.y) > 0.1;
+      state.inputMap.shoot =
+        Math.abs(controls.fire.x) > 0.1 || Math.abs(controls.fire.y) > 0.1;
     } else {
-      state.inputMap.moveX = (this.cursors.right.isDown || this.keys.right.isDown ? 1 : 0) - (this.cursors.left.isDown || this.keys.left.isDown ? 1 : 0);
-      state.inputMap.moveY = (this.cursors.down.isDown || this.keys.down.isDown ? 1 : 0) - (this.cursors.up.isDown || this.keys.up.isDown ? 1 : 0);
-      const worldPoint = this.cameras.main.getWorldPoint(this.mouseX, this.mouseY);
+      state.inputMap.moveX =
+        (this.cursors.right.isDown || this.keys.right.isDown ? 1 : 0) -
+        (this.cursors.left.isDown || this.keys.left.isDown ? 1 : 0);
+      state.inputMap.moveY =
+        (this.cursors.down.isDown || this.keys.down.isDown ? 1 : 0) -
+        (this.cursors.up.isDown || this.keys.up.isDown ? 1 : 0);
+      const worldPoint = this.cameras.main.getWorldPoint(
+        this.mouseX,
+        this.mouseY,
+      );
       state.inputMap.mouseX = worldPoint.x;
       state.inputMap.mouseY = worldPoint.y;
       state.inputMap.shoot = this.isMouseDown;
       state.inputMap.isAutoRotate = this.isAutoRotate;
     }
-
   }
 
-  updateLocators () {
+  updateLocators() {
     if (state.game.topPlayer != state.game.player.id) {
-      const bot = state.game.enemies.find(p => p.id == state.game.topPlayer);
-      this.topLocator.update(bot.x, bot.y)
+      const bot = state.game.enemies.find((p) => p.id == state.game.topPlayer);
+      this.topLocator.update(bot.x, bot.y);
     } else {
       this.topLocator.update(0, 0);
     }
@@ -272,7 +254,7 @@ export default class GameScene extends Phaser.Scene {
           b.x,
           b.y,
           b.lifespan,
-          this.player.weapon.height * 0.8
+          this.player.weapon.height * 0.8,
         );
 
         rendered.set(b.id, bulletObj);
@@ -318,7 +300,7 @@ export default class GameScene extends Phaser.Scene {
       } else {
         this.renderedPolygons.set(
           id,
-          new Polygon(this, p.id, p.x, p.y, p.type)
+          new Polygon(this, p.id, p.x, p.y, p.type),
         );
       }
     }
@@ -348,7 +330,7 @@ export default class GameScene extends Phaser.Scene {
       } else {
         this.renderedEnemies.set(
           id,
-          new Enemy(this, e.name, e.x, e.y, e.rotation, e.type, e.level)
+          new Enemy(this, e.name, e.x, e.y, e.rotation, e.type, e.level),
         );
       }
     }
