@@ -1,6 +1,6 @@
 import { polygons } from "../data/polygons";
 import { world } from "../server/world";
-import { getRandomInt } from "../utils/functions";
+import { getRandomInt, simplifyFloats } from "../utils/functions";
 import { chunkKeyWorld } from "./chunkSystem";
 
 export function createPolygon(x, y, type) {
@@ -21,7 +21,12 @@ export function updatePolygons(delta) {
     polygon.x += (polygon.velX * delta) / 1000;
     polygon.y += (polygon.velY * delta) / 1000;
 
-    if (polygon.x < 0 || polygon.x > 9600 || polygon.y < 0 || polygon.y > 9600) {
+    if (
+      polygon.x < 0 ||
+      polygon.x > 9600 ||
+      polygon.y < 0 ||
+      polygon.y > 9600
+    ) {
       world.polygons.delete(polygon.id);
       return;
     }
@@ -38,16 +43,14 @@ export function updatePolygons(delta) {
       }
       world.polygons.delete(polygon.id);
     } else {
-      world.chunks.get(chunkKeyWorld(polygon.x, polygon.y)).add(
-        {
-          elType: "polygon",
-          id: polygon.id,
-          x: polygon.x,
-          y: polygon.y,
-          type: polygon.type,
-          hp: polygon.hp,
-        }
-      );
+      world.chunks.get(chunkKeyWorld(polygon.x, polygon.y)).add({
+        elType: "polygon",
+        id: polygon.id,
+        x: simplifyFloats(polygon.x),
+        y: simplifyFloats(polygon.y),
+        type: polygon.type,
+        hp: polygon.hp,
+      });
     }
   });
 }

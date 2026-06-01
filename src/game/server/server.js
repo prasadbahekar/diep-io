@@ -1,12 +1,7 @@
 import { updateBullets } from "../systems/bulletSystem";
 import { updatePlayers, initializePlayer } from "../systems/playerSystem";
 import { createPolygon, updatePolygons } from "../systems/polygonSystem";
-import {
-  chunkKey,
-  chunkKeyWorld,
-  initializeChunks,
-  updateChunks,
-} from "../systems/chunkSystem";
+import { chunkKey, initializeChunks } from "../systems/chunkSystem";
 import { Packet, packets } from "./packet";
 import { world } from "./world";
 import { getRandomInt } from "../utils/functions";
@@ -83,6 +78,8 @@ function createPacket() {
       topPlayer: topPlayer.id,
     };
 
+    if (player.isBot) continue;
+
     const top6Players = [...world.players.values()]
       .filter((p) => p && p.id !== player.id)
       .sort((a, b) => b.score - a.score)
@@ -130,9 +127,7 @@ function createPacket() {
     }
 
     const existingIds = new Set(packet.enemies.map((e) => e.id));
-
     packet.enemies.push(...top6Players.filter((p) => !existingIds.has(p.id)));
-
     packets[player.id] = packet;
   }
 }

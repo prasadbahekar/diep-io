@@ -6,16 +6,14 @@ export function enterFullscreen() {
   if (elem.requestFullscreen) {
     return elem.requestFullscreen();
   } else if (elem.webkitRequestFullscreen) {
-    // Safari
     return elem.webkitRequestFullscreen();
   } else if (elem.msRequestFullscreen) {
-    // old Edge
     return elem.msRequestFullscreen();
   }
 }
 
 export function getRandomInt(min, max) {
-return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function getGamepadControls() {
@@ -31,13 +29,10 @@ export function getCollisionChunks(x, y, radius) {
   const CHUNK_SIZE = 128;
   const chunkX = Math.floor(x / CHUNK_SIZE);
   const chunkY = Math.floor(y / CHUNK_SIZE);
-
   const localX = x % CHUNK_SIZE;
   const localY = y % CHUNK_SIZE;
-
   const chunks = [];
 
-  // always include current chunk
   chunks.push(`${chunkX},${chunkY}`);
 
   const nearLeft = localX < radius;
@@ -45,40 +40,19 @@ export function getCollisionChunks(x, y, radius) {
   const nearTop = localY < radius;
   const nearBottom = localY > CHUNK_SIZE - radius;
 
-  // horizontal neighbors
-  if (nearLeft) {
-    chunks.push(`${chunkX - 1},${chunkY}`);
-  }
-
-  if (nearRight) {
-    chunks.push(`${chunkX + 1},${chunkY}`);
-  }
-
-  // vertical neighbors
-  if (nearTop) {
-    chunks.push(`${chunkX},${chunkY - 1}`);
-  }
-
-  if (nearBottom) {
-    chunks.push(`${chunkX},${chunkY + 1}`);
-  }
-
-  // diagonal neighbors
-  if (nearLeft && nearTop) {
-    chunks.push(`${chunkX - 1},${chunkY - 1}`);
-  }
-
-  if (nearRight && nearTop) {
-    chunks.push(`${chunkX + 1},${chunkY - 1}`);
-  }
-
-  if (nearLeft && nearBottom) {
-    chunks.push(`${chunkX - 1},${chunkY + 1}`);
-  }
-
-  if (nearRight && nearBottom) {
-    chunks.push(`${chunkX + 1},${chunkY + 1}`);
-  }
+  if (nearLeft) chunks.push(`${chunkX - 1},${chunkY}`);
+  if (nearRight) chunks.push(`${chunkX + 1},${chunkY}`);
+  if (nearTop) chunks.push(`${chunkX},${chunkY - 1}`);
+  if (nearBottom) chunks.push(`${chunkX},${chunkY + 1}`);
+  if (nearLeft && nearTop) chunks.push(`${chunkX - 1},${chunkY - 1}`);
+  if (nearRight && nearTop) chunks.push(`${chunkX + 1},${chunkY - 1}`);
+  if (nearLeft && nearBottom) chunks.push(`${chunkX - 1},${chunkY + 1}`);
+  if (nearRight && nearBottom) chunks.push(`${chunkX + 1},${chunkY + 1}`);
 
   return chunks;
+}
+
+export function simplifyFloats(value, detail = 2) {
+  const detailMultiplier = 10 ^ detail;
+  return Math.round(value * detailMultiplier) / detailMultiplier;
 }
