@@ -50,8 +50,6 @@ function updateBot(botId) {
     upgradeTitle = upgradeTitles[bestIndex];
   }
 
-  console.log(bot.upLvl);
-
   // State
   let state = "wander";
   if (nearest.player && nearest.player.level > bot.level) {
