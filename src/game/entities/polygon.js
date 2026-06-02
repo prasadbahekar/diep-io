@@ -59,6 +59,22 @@ export default class Polygon extends Phaser.GameObjects.Container {
         break;
       }
 
+      case "hexagon": {
+        const r = 35;
+        const points = [];
+
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI * 2 * i) / 6;
+          points.push(Math.cos(angle) * r, Math.sin(angle) * r);
+        }
+
+        bodyObj = new Phaser.GameObjects.Polygon(scene, 0, 0, points, 0x35c5db);
+        bodyObj.setStrokeStyle(3, 0x2eaabd);
+        const bounds = bodyObj.getBounds();
+        bodyObj.setPosition(-bounds.x, -bounds.y);
+        break;
+      }
+
       default: {
         bodyObj = new Phaser.GameObjects.Rectangle(
           scene,
@@ -84,7 +100,7 @@ export default class Polygon extends Phaser.GameObjects.Container {
     this.x = x;
     this.y = y;
     this.hp = hp;
-    this.rotation += this.rotateSide * delta / 1000 * 0.2;
+    this.rotation += ((this.rotateSide * delta) / 1000) * 0.2;
 
     this.healthBar.x = x;
     this.healthBar.y = y;
@@ -95,9 +111,7 @@ export default class Polygon extends Phaser.GameObjects.Container {
 
     this.displayHp += (hp - this.displayHp) * 0.99 * (delta / 100);
 
-    this.renderHealthBar(
-      this.displayHp / polygons[this.type].hp
-    );
+    this.renderHealthBar(this.displayHp / polygons[this.type].hp);
   }
 
   renderHealthBar(percent) {

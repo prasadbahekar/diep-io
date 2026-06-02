@@ -41,12 +41,20 @@ function repoulateEntities() {
   }
 
   if (world.polygons.size < 300) {
-    const types = ["square", "square", "triangle", "triangle", "pentagon"];
-    createPolygon(
-      getRandomInt(0, 9600),
-      getRandomInt(0, 9600),
-      types[getRandomInt(0, types.length - 1)],
-    );
+    const r = Math.random() * 100;
+
+    let polygonType;
+    if (r < 45) {
+      polygonType = "square";
+    } else if (r < 90) {
+      polygonType = "triangle";
+    } else if (r < 99.5) {
+      polygonType = "pentagon";
+    } else {
+      polygonType = "hexagon";
+    }
+
+    createPolygon(getRandomInt(0, 9600), getRandomInt(0, 9600), polygonType);
   }
 }
 

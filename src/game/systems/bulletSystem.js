@@ -1,5 +1,5 @@
 import { world } from "../server/world";
-import { getCollisionChunks } from "../utils/functions";
+import { getCollisionChunks, simplifyFloats } from "../utils/functions";
 import { chunkKeyWorld } from "./chunkSystem";
 
 export function updateBullets(delta) {
@@ -16,16 +16,14 @@ export function updateBullets(delta) {
     if (bullet.lifespan <= 0 || bullet.force <= 0 || bullet.hp <= 0) {
       world.bullets.delete(bullet.id);
     } else {
-      world.chunks.get(chunkKeyWorld(bullet.x, bullet.y)).add(
-        {
-          elType: "bullet",
-          id: bullet.id,
-          x: bullet.x,
-          y: bullet.y,
-          lifespan: bullet.lifespan,
-          parent: bullet.parent,
-        }
-      );
+      world.chunks.get(chunkKeyWorld(bullet.x, bullet.y)).add({
+        elType: "bullet",
+        id: bullet.id,
+        x: simplifyFloats(bullet.x),
+        y: simplifyFloats(bullet.y),
+        lifespan: bullet.lifespan,
+        parent: bullet.parent,
+      });
     }
   });
 }
@@ -40,24 +38,39 @@ function checkBulletCollisions(bulletId) {
         const dx = element.x - bullet.x;
         const dy = element.y - bullet.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const threshold = element.type === "square" ? 20 : element.type === "triangle" ? 22 : 30;
+        const threshold =
+          element.type === "square"
+            ? 20
+            : element.type === "triangle"
+              ? 22
+              : 30;
         if (distance < threshold) {
-          const damage = (bullet.force > element.hp) ? element.hp : bullet.force * 0.5;
+          const damage =
+            bullet.force > element.hp ? element.hp : bullet.force * 0.5;
           world.polygons.get(element.id).hp -= damage;
           world.polygons.get(element.id).lastHitBy = bullet.parent;
           world.bullets.get(bulletId).force -= damage;
 
+          const knockbackMultiplier =
+            element.type == "triangle" || element.type == "square" ? 1 : 0.5;
           const knockbackStrength = damage * 0.15;
-          const knockbackX = knockbackStrength * bullet.velX;
-          const knockbackY = knockbackStrength * bullet.velY;
+          const knockbackX =
+            knockbackStrength * bullet.velX * knockbackMultiplier;
+          const knockbackY =
+            knockbackStrength * bullet.velY * knockbackMultiplier;
           world.polygons.get(element.id).velX += knockbackX;
           world.polygons.get(element.id).velY += knockbackY;
 
-          const backDamage = element.type === "square" ? 2 : element.type === "triangle" ? 4 : 6;
+          const backDamage =
+            element.type === "square" ? 2 : element.type === "triangle" ? 4 : 6;
           bullet.hp -= backDamage * 0.2;
         }
       }
-      if (element.elType == "bullet" && element.id != bulletId && element.parent != bullet.parent) {
+      if (
+        element.elType == "bullet" &&
+        element.id != bulletId &&
+        element.parent != bullet.parent
+      ) {
         const dx = element.x - bullet.x;
         const dy = element.y - bullet.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -77,7 +90,7 @@ function checkBulletCollisions(bulletId) {
         const dy = element.y - bullet.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance < 40) {
-          const damage = (bullet.force > element.hp) ? element.hp : bullet.force;
+          const damage = bullet.force > element.hp ? element.hp : bullet.force;
           world.players.get(element.id).hp -= damage;
           world.players.get(element.id).lastHitBy = bullet.parent;
           world.bullets.get(bulletId).force -= damage;
@@ -87,7 +100,9 @@ function checkBulletCollisions(bulletId) {
           const knockbackY = knockbackStrength * bullet.velY;
           world.players.get(element.id).velX += knockbackX;
           world.players.get(element.id).velY += knockbackY;
-          bullet.hp -= (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) / 1000;
+          bullet.hp -=
+            (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) /
+            1000;
         }
       }
     }

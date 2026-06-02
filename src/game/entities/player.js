@@ -8,11 +8,11 @@ export default class Player extends Phaser.GameObjects.Container {
     // Player Shapes
     const pBody = scene.add.circle(0, 0, 12, 0x15b5df);
     pBody.setStrokeStyle(1, 0x0f88a9);
-    const weapon = scene.add.rectangle(12, 0, 24, 12, 0x9d9d9d);
+    const weapon = scene.add.rectangle(12, 0, 20, 10, 0x9d9d9d);
     weapon.setStrokeStyle(1, 0x787878);
     const crown = scene.add.image(0, -16, "crown");
     crown.setScale(0.03);
-    crown.setAlpha(0)
+    crown.setAlpha(0);
     const weapons = scene.add.container(0, 0, [weapon]);
     const healthBar = scene.add.graphics();
 
@@ -42,8 +42,10 @@ export default class Player extends Phaser.GameObjects.Container {
   updateRotation(delta) {
     const target = state.game.player.rotation;
     const diff = Phaser.Math.Angle.Wrap(target - this.weapons.rotation);
-    const value = this.weapons.rotation + diff * 0.9999 * delta / 100;
-    this.weapons.rotation = Number.isFinite(value) ? value : this.weapons.rotation;
+    const value = this.weapons.rotation + (diff * 0.9999 * delta) / 100;
+    this.weapons.rotation = Number.isFinite(value)
+      ? value
+      : this.weapons.rotation;
   }
 
   updateDelta(delta) {
@@ -75,7 +77,7 @@ export default class Player extends Phaser.GameObjects.Container {
     );
 
     // Render Health
-    this.hp = state.game.player.hp
+    this.hp = state.game.player.hp;
     if (this.displayHp === undefined) this.displayHp = this.hp;
     this.displayHp += (this.hp - this.displayHp) * 0.99 * (delta / 100);
     this.renderHealthBar(this.displayHp / state.game.player.maxHp);
