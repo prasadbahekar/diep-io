@@ -69,7 +69,7 @@ export default class Player extends Phaser.GameObjects.Container {
     const speed = Math.sqrt(this.velX * this.velX + this.velY * this.velY);
     const speedFactor = Phaser.Math.Clamp(speed / 180, 0, 1);
     const baseZoom = 2 / this.scale;
-    const targetZoom = baseZoom - speedFactor * 0.03; // - shootFactor;
+    const targetZoom = baseZoom - speedFactor * 0.03;
     this.scene.cameras.main.zoom = Phaser.Math.Linear(
       this.scene.cameras.main.zoom,
       targetZoom,

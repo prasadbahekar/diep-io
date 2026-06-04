@@ -41,6 +41,14 @@ export function updatePlayers(delta) {
     if (player.hp <= 0) {
       const lastHitPlayer = world.players.get(player.lastHitBy);
       if (lastHitPlayer) lastHitPlayer.score += player.score;
+      if (!player.isBot) {
+        world.spectators.set(player.id, {
+          x: player.x,
+          y: player.y,
+          id: player.id,
+          renderDistance: player.distance,
+        });
+      }
       world.players.delete(player.id);
       return;
     }
@@ -177,7 +185,7 @@ function playerCollisions(player, delta) {
             : element.type === "triangle"
               ? 50
               : 75;
-        if (distance < threshold + 3) {
+        if (distance < threshold + 1) {
           player.velX -= dx * 0.25;
           player.velY -= dy * 0.25;
         }
@@ -186,6 +194,9 @@ function playerCollisions(player, delta) {
             (parseInt(player.upLvl[3] || "0") + 5) * 4 * (delta / 300);
           world.polygons.get(element.id).hp -= damage;
           world.polygons.get(element.id).lastHitBy = player.id;
+          world.players.get(player.id).lastHitBy =
+            element.type.charAt(0).toUpperCase() + element.type.slice(1);
+
           const backDamage =
             element.type === "square"
               ? 8
@@ -211,6 +222,9 @@ function playerCollisions(player, delta) {
             (parseInt(world.players.get(element.id).upLvl[3] || "0") + 5) *
             6 *
             (delta / 1000);
+          world.players.get(player.id).lastHitBy = world.players.get(
+            element.id,
+          ).name;
           world.players.get(element.id).velX += dx * 0.07;
           world.players.get(element.id).velY += dy * 0.07;
         }

@@ -166,6 +166,8 @@ canvas {
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    align-items: center;
+    justify-content: center;
     display: none;
 }
 
@@ -264,6 +266,7 @@ canvas {
 }
 
 #home-menu #startBtn {
+    margin-top: 24px;
     text-shadow:
         -1px -1px 0 black,
         1px -1px 0 black,

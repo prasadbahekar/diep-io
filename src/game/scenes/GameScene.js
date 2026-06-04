@@ -40,6 +40,7 @@ export default class GameScene extends Phaser.Scene {
     const renderDistance =
       Math.floor((Math.max(innerWidth, innerHeight) * 1.25) / 128) + 1;
     state.game.player.id = joinPlayer(renderDistance, state.game.player.name);
+    state.game.joinTime = Date.now();
     this.prevLvl = 1;
     this.isAutoRotate = false;
 
@@ -80,13 +81,6 @@ export default class GameScene extends Phaser.Scene {
         this.isAutoRotate = !this.isAutoRotate;
       }
     });
-
-    // Bots
-    // this.bots = [];
-    // for (let i = 0; i < 5; i++) {
-    //   const botId = joinPlayer(renderDistance, botNames[Math.floor(Math.random() * botNames.length)], true);
-    //   this.bots.push(botId);
-    // }
 
     // Player
     this.player = new Player(this, this.worldSize / 2, this.worldSize / 2);
@@ -131,13 +125,20 @@ export default class GameScene extends Phaser.Scene {
     updateServerInput(state.inputMap, state.game.player.id);
     updateServer(delta);
     this.updateLocalTruth();
-    this.player.update(delta);
+    if (!state.game.isSpectator) this.player.update(delta);
     this.updateBullets();
     this.updatePolygons(delta);
     this.updateEnemies(delta);
-    // this.topLocator.update(0, 0)
-    this.updateLocators();
+    if (!state.game.isSpectator) this.updateLocators();
     updateGameUI();
+
+    if (state.game.isSpectator) {
+      this.cameras.main.zoom = Phaser.Math.Linear(
+        this.cameras.main.zoom,
+        0.7,
+        0.05,
+      );
+    }
 
     state.game.player.prevX = state.game.player.x;
     state.game.player.prevY = state.game.player.y;
@@ -163,14 +164,25 @@ export default class GameScene extends Phaser.Scene {
     state.game.player.x = packet.player.x;
     state.game.player.y = packet.player.y;
     state.game.player.rotation = packet.player.rotation;
-    state.game.player.score = packet.player.score;
-    state.game.player.level = packet.player.level;
     state.game.player.lastShoot = packet.player.lastShoot;
     state.game.player.upgrades = packet.player.upgrades;
     state.game.player.upLvl = packet.player.upLvls;
     state.game.player.hp = packet.player.hp;
     state.game.player.maxHp = packet.player.maxHp;
     state.game.topPlayer = packet.player.topPlayer;
+
+    if (packet.player.score != null)
+      state.game.player.score = packet.player.score;
+
+    if (packet.player.level != null)
+      state.game.player.level = packet.player.level;
+
+    if (packet.player.lastHitBy != null) {
+      state.game.player.lastHitBy = packet.player.lastHitBy;
+      if (state.game.deathTime == null) state.game.deathTime = Date.now();
+    }
+
+    state.game.isSpectator = packet.player.isSpectator;
 
     state.game.bullets = packet.bullets;
     state.game.polygons = packet.polygons;

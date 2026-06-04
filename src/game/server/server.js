@@ -9,6 +9,14 @@ import { inputs } from "../utils/input";
 import { updateBots } from "../systems/botSystem";
 import { botNames } from "../data/botNames";
 
+for (let i = 0; i < 8; i++) {
+  const botId = joinPlayer(
+    3,
+    botNames[Math.floor(Math.random() * botNames.length)],
+    true,
+  );
+}
+
 export function joinPlayer(renderDistance, playerName, bot = false) {
   return initializePlayer(renderDistance, playerName, bot);
 }
@@ -24,21 +32,21 @@ export function updateServer(delta) {
 }
 
 function repoulateEntities() {
-  if (world.players.size < 8) {
-    const botId = joinPlayer(
-      3,
-      botNames[Math.floor(Math.random() * botNames.length)],
-      true,
-    );
+  // if (world.players.size < 8) {
+  //   const botId = joinPlayer(
+  //     3,
+  //     botNames[Math.floor(Math.random() * botNames.length)],
+  //     true,
+  //   );
 
-    let highestScore = 0;
-    for (const player of world.players.values()) {
-      if (player.score > highestScore) highestScore = player.score;
-    }
-    world.players.get(botId).score = Math.floor(
-      highestScore * (Math.random() * 0.6),
-    );
-  }
+  //   let highestScore = 0;
+  //   for (const player of world.players.values()) {
+  //     if (player.score > highestScore) highestScore = player.score;
+  //   }
+  //   world.players.get(botId).score = Math.floor(
+  //     highestScore * (Math.random() * 0.6),
+  //   );
+  // }
 
   if (world.polygons.size < 300) {
     const r = Math.random() * 100;
@@ -66,10 +74,29 @@ function createPacket() {
   const topPlayer = world.players.values().reduce((max, obj) => {
     return obj.score > max.score ? obj : max;
   });
+
+  let top6Players = [...world.players.values()]
+    .filter((p) => p && p.id)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map((p) => ({
+      elType: "player",
+      x: p.x,
+      y: p.y,
+      type: "basic",
+      hp: p.hp,
+      name: p.name,
+      maxHp: p.maxHp,
+      rotation: p.rotation,
+      id: p.id,
+      score: p.score,
+      level: p.level,
+    }));
+
   for (const player of world.players.values()) {
     if (!player) continue;
 
-    const packet = new Packet();
+    let packet = new Packet();
 
     packet.player = {
       x: player.x,
@@ -84,58 +111,79 @@ function createPacket() {
       maxHp: player.maxHp,
       now: Date.now(),
       topPlayer: topPlayer.id,
+      lastHitBy: player.lastHitBy,
     };
 
     if (player.isBot) continue;
 
-    const top6Players = [...world.players.values()]
-      .filter((p) => p && p.id !== player.id)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
-      .map((p) => ({
-        elType: "player",
-        x: p.x,
-        y: p.y,
-        type: "basic",
-        hp: p.hp,
-        name: p.name,
-        maxHp: p.maxHp,
-        rotation: p.rotation,
-        id: p.id,
-        score: p.score,
-        level: p.level,
-      }));
+    packet = getChunkElements(
+      player.x,
+      player.y,
+      player.id,
+      player.renderDistance,
+      packet,
+    );
 
-    const playerChunkX = Math.floor(player.x / 128);
-    const playerChunkY = Math.floor(player.y / 128);
-    Math.floor(player.y / 128);
+    const filteredTop6Players = top6Players.filter((p) => p.id !== player.id);
 
-    for (let dx = -player.renderDistance; dx <= player.renderDistance; dx++) {
-      for (let dy = -player.renderDistance; dy <= player.renderDistance; dy++) {
-        const chunkX = playerChunkX + dx;
-        const chunkY = playerChunkY + dy;
+    const existingIds = new Set(packet.enemies.map((e) => e.id));
+    packet.enemies.push(
+      ...filteredTop6Players.filter((p) => !existingIds.has(p.id)),
+    );
+    packets[player.id] = packet;
+  }
 
-        const chunk = world.chunks.get(chunkKey(chunkX, chunkY));
-        if (!chunk) continue;
+  for (const spectator of world.spectators.values()) {
+    let packet = getChunkElements(
+      spectator.x,
+      spectator.y,
+      spectator.id,
+      spectator.renderDistance,
+      new Packet(),
+    );
 
-        for (const element of chunk) {
-          if (element.elType === "bullet") {
-            packet.bullets.push(element);
-          }
+    packet.player = { isSpectator: true };
 
-          if (element.elType === "polygon") {
-            packet.polygons.push(element);
-          }
+    const filteredTop6Players = top6Players.filter(
+      (p) => p.id !== spectator.id,
+    );
 
-          if (element.elType === "player" && element.id !== player.id) {
-            packet.enemies.push(element);
-          }
+    const existingIds = new Set(packet.enemies.map((e) => e.id));
+    packet.enemies.push(
+      ...filteredTop6Players.filter((p) => !existingIds.has(p.id)),
+    );
+
+    packets[spectator.id] = packet;
+  }
+}
+
+function getChunkElements(x, y, id, renderDistance, packet) {
+  const playerChunkX = Math.floor(x / 128);
+  const playerChunkY = Math.floor(y / 128);
+
+  for (let dx = -renderDistance; dx <= renderDistance; dx++) {
+    for (let dy = -renderDistance; dy <= renderDistance; dy++) {
+      const chunkX = playerChunkX + dx;
+      const chunkY = playerChunkY + dy;
+
+      const chunk = world.chunks.get(chunkKey(chunkX, chunkY));
+      if (!chunk) continue;
+
+      for (const element of chunk) {
+        if (element.elType === "bullet") {
+          packet.bullets.push(element);
+        }
+
+        if (element.elType === "polygon") {
+          packet.polygons.push(element);
+        }
+
+        if (element.elType === "player" && element.id !== id) {
+          packet.enemies.push(element);
         }
       }
     }
-
-    const existingIds = new Set(packet.enemies.map((e) => e.id));
-    packet.enemies.push(...top6Players.filter((p) => !existingIds.has(p.id)));
-    packets[player.id] = packet;
   }
+
+  return packet;
 }

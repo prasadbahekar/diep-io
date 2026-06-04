@@ -92,7 +92,10 @@ function checkBulletCollisions(bulletId) {
         if (distance < 40) {
           const damage = bullet.force > element.hp ? element.hp : bullet.force;
           world.players.get(element.id).hp -= damage;
-          world.players.get(element.id).lastHitBy = bullet.parent;
+          const parentObj = world.players.get(bullet.parent);
+          world.players.get(element.id).lastHitBy = parentObj
+            ? parentObj.name
+            : null;
           world.bullets.get(bulletId).force -= damage;
 
           const knockbackStrength = damage * 0.15;

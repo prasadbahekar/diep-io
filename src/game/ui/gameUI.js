@@ -2,6 +2,7 @@ import { COLORS } from "../data/colors";
 import { getLevelData, getPointsToNextLevel } from "../data/levels";
 import { state } from "../state";
 import Phaser from "phaser";
+import { formatDuration } from "../utils/functions";
 
 const upgradesContainer = document.getElementById("upgrades");
 let showPanel = false;
@@ -11,7 +12,7 @@ let currentWidth = 0;
 let prevLevel = 1;
 let animateProgress = false;
 
-const controlsEl = document.querySelector(".controls")
+const controlsEl = document.querySelector(".controls");
 controlsEl.style.display = "none";
 
 let upgradeElements = [];
@@ -29,6 +30,10 @@ const statMap = {
 // Initialize Elements
 const map = document.getElementById("map");
 const playerLocator = document.getElementById("playerPoint");
+const continueDeathButton = document.getElementById("continueBtn");
+continueDeathButton.addEventListener("click", () => {
+  window.location.reload();
+});
 
 function createUpgrade(title, hotkey, color = "#000000") {
   const upgrade = document.createElement("div");
@@ -91,7 +96,7 @@ export function createGameUI() {
   for (const elem of upgradeElements) {
     const add = elem.querySelector(".add");
     add.addEventListener("click", () => {
-      if (state.game.player.upgrades > 0) { 
+      if (state.game.player.upgrades > 0) {
         state.inputMap.upgrade = elem.dataset.upgrade;
       }
     });
@@ -112,7 +117,27 @@ export function updateGameUI() {
   scoreEl.textContent = `Score: ${state.game.player.score}`;
   levelEl.textContent = `Lvl ${state.game.player.level} Tank`;
 
-  updateProgressBar();
+  if (!state.game.isSpectator) updateProgressBar();
+  if (state.game.isSpectator) {
+    const deathUI = document.querySelector(".death-screen");
+    deathUI.style.display = "flex";
+    const deathKilledBy = document.querySelector(
+      ".death-screen .death-killer h3",
+    );
+    deathKilledBy.textContent = state.game.player.lastHitBy;
+
+    const deathScore = document.querySelector(".death-screen .death-score");
+    deathScore.textContent = "Score: " + state.game.player.score;
+
+    const deathLevel = document.querySelector(".death-screen .death-level");
+    deathLevel.textContent = "Level: " + state.game.player.level;
+
+    const deathDuration = document.querySelector(
+      ".death-screen .death-duration",
+    );
+    deathDuration.textContent =
+      "Time: " + formatDuration(state.game.joinTime, state.game.deathTime);
+  }
 
   if (showPanel || mKey || state.game.player.upgrades > 0) {
     upgradesContainer.classList.add("active");
@@ -132,12 +157,12 @@ export function updateGameUI() {
     state.game.player.upgrades > 1 ? `${state.game.player.upgrades}x` : "";
 
   // Update Map
-  const players = {}
-  const leftPercent = state.game.player.x / 9600 * 100
-  const topPercent = state.game.player.y / 9600 * 100
-  playerLocator.style.top = topPercent + "%"
-  playerLocator.style.left = leftPercent + "%"
-  playerLocator.style.transform = `translate(-${50}%, -${50}%) rotate(${state.game.player.rotation + Math.PI / 2}rad)`
+  const players = {};
+  const leftPercent = (state.game.player.x / 9600) * 100;
+  const topPercent = (state.game.player.y / 9600) * 100;
+  playerLocator.style.top = topPercent + "%";
+  playerLocator.style.left = leftPercent + "%";
+  playerLocator.style.transform = `translate(-${50}%, -${50}%) rotate(${state.game.player.rotation + Math.PI / 2}rad)`;
   const activePlayerIds = new Set();
   players[state.game.player.id] = state.game.player.score;
   activePlayerIds.add(state.game.player.id);
@@ -151,8 +176,8 @@ export function updateGameUI() {
       playerEl.classList.add("enemyLocation");
       map.appendChild(playerEl);
     }
-    const pTop = player.y / 9600 * 100;
-    const pLeft = player.x / 9600 * 100;
+    const pTop = (player.y / 9600) * 100;
+    const pLeft = (player.x / 9600) * 100;
     playerEl.style.top = pTop + "%";
     playerEl.style.left = pLeft + "%";
     playerEl.style.transform = `translate(-50%, -50%)`;
@@ -165,8 +190,12 @@ export function updateGameUI() {
     }
   }
 
-  syncUpgradeBars()
-  updateScoreboard(Object.entries(players).sort((a, b) => b[1] - a[1]).slice(0, 6));
+  syncUpgradeBars();
+  updateScoreboard(
+    Object.entries(players)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6),
+  );
 }
 
 function updateScoreboard(players) {
@@ -193,8 +222,12 @@ function updateScoreboard(players) {
       playerEl.classList.add("currentPlayer");
     }
     playerEl.querySelector(".prog-score").textContent = playerScore;
-    const scoreboardName =  (playerId == state.game.player.id) ? state.game.player.name : state.game.enemies.find(item => item.id == playerId).name;
-    playerEl.querySelector(".prog-user").textContent = scoreboardName == "" ? "Unnamed Player" : scoreboardName;
+    const scoreboardName =
+      playerId == state.game.player.id
+        ? state.game.player.name
+        : state.game.enemies.find((item) => item.id == playerId).name;
+    playerEl.querySelector(".prog-user").textContent =
+      scoreboardName == "" ? "Unnamed Player" : scoreboardName;
     scoreboard.appendChild(playerEl);
   }
 
@@ -274,24 +307,24 @@ function detectControlsMode() {
   }
 }
 
-// 
+//
 // GAMEPAD CONTROLS
-// 
+//
 
 window.addEventListener("gamepadconnected", (e) => {
   console.log("damn you've a controller?");
   console.log(e.gamepad);
   state.game.onGamepad = true;
-  const controlsEl = document.querySelector(".controls")
+  const controlsEl = document.querySelector(".controls");
   controlsEl.style.display = "flex";
   // requestAnimationFrame(update);
 });
 
 window.addEventListener("gamepaddisconnected", () => {
   state.game.onGamepad = false;
-  const controlsEl = document.querySelector(".controls")
+  const controlsEl = document.querySelector(".controls");
   controlsEl.style.display = "none";
-})
+});
 
 //
 // MOBILE CONTROLS
@@ -299,20 +332,20 @@ window.addEventListener("gamepaddisconnected", () => {
 
 const controls = {
   move: { x: 0, y: 0 },
-  fire: { x: 0, y: 0 }
+  fire: { x: 0, y: 0 },
 };
 
 export function setMobileControls() {
   createJoystick({
     outer: document.getElementById("left-joystick"),
     inner: document.getElementById("left-inner"),
-    output: controls.move
+    output: controls.move,
   });
 
   createJoystick({
     outer: document.getElementById("right-joystick"),
     inner: document.getElementById("right-inner"),
-    output: controls.fire
+    output: controls.fire,
   });
 }
 
@@ -356,13 +389,11 @@ function createJoystick({ outer, inner, output }) {
       dy = (dy / distance) * maxRadius;
     }
 
-    inner.style.transform =
-      `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
+    inner.style.transform = `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
     output.x = dx / maxRadius;
     output.y = dy / maxRadius;
   }
 }
-
 
 //
 // DESKTOP CONTROLS
