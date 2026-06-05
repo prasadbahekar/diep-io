@@ -6,11 +6,11 @@
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://prasadbahekar.github.io/diep-io/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 [![Made With](https://img.shields.io/badge/Made%20With-JavaScript-orange?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![GitHub Stars](https://img.shields.io/github/stars/prasadbahekar/diep-io?style=for-the-badge&logo=github)](https://github.com/prasadbahekar/diep-io/stargazers)
 
-</h3>
 
 > **A remake of the original [Diep.io](https://diep.io)**. In this, you have to battle as a tank, shoot bullets, destroy polygons, level up, and upgrade your tank!
+
+</h3>
 
 ---
 
@@ -21,9 +21,7 @@ This is a **web-based game** hosted on **GitHub Pages**. Play instantly—no ins
 - **Play Now**: [https://prasadbahekar.github.io/diep-io](https://prasadbahekar.github.io/diep-io)
 - Just open the link in any modern browser and start playing!
 
----
-
-## Tech stuff Used
+## Tech Stack Used
 
 The things that I have used to develop this game.
 
@@ -35,8 +33,6 @@ The things that I have used to develop this game.
 | **Languages** | HTML, CSS, JavaScript, JSON |
 | **Hosting** | GitHub Pages |
 
----
-
 ## Features
 
 This prototype is developed **under 31 days**. These are some highlighting features I implemented: 
@@ -46,8 +42,6 @@ This prototype is developed **under 31 days**. These are some highlighting featu
 - **Similar Game** – Deep similarities to the original game (movement, upgrades, physics)
 - **Gamepad Support** – Partial controller compatibility.
 - **Optimized Code** – Chunk-based rendering for smooth gameplay even with many entities
-
----
 
 ## How to Play
 
@@ -78,8 +72,6 @@ The code structure follows a **clean upgradable architecture** between the Serve
 9. **Render Everything** (Client) – Draw players, bullets, polygons and locators
 10. **Update UI** (Client) – Refresh health bars, level indicators, scores and map
 
----
-
 ## Run Locally
 
 ### Requirements
@@ -105,8 +97,6 @@ npm run preview
 ```
 
 
----
-
 ## Future Plans
 
 This project may get updated in the near future with the following features:
@@ -118,13 +108,9 @@ This project may get updated in the near future with the following features:
 - [ ] **Sound Effects & Music** – Great audio experience
 
 
----
-
 ## License
 
 This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
-
----
 
 ## Credits
 
